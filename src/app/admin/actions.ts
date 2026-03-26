@@ -4,14 +4,20 @@ import { Client, Databases, ID, Query } from 'node-appwrite';
 import { revalidatePath } from 'next/cache';
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import slugify from "slugify";
-const client = new Client()
+let appwriteClient: Client | null = null;
+let databases: Databases | null = null;
+
+function getAppwrite() {
+  if (databases) return { databases, DATABASE_ID: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || '69ba2ae900156b378b6b' };
+  
+  appwriteClient = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || '')
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || '')
     .setKey(process.env.APPWRITE_API_KEY || '');
 
-const databases = new Databases(client);
-
-const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || '69ba2ae900156b378b6b';
+  databases = new Databases(appwriteClient);
+  return { databases, DATABASE_ID: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || '69ba2ae900156b378b6b' };
+}
 
 let r2Client: S3Client | null = null;
 
@@ -129,8 +135,9 @@ export async function createProject(formData: FormData) {
       isFavorite: formData.get('isFavorite') === 'on'
     };
 
+    const { databases, DATABASE_ID } = getAppwrite();
     console.log("📡 Creating document in Appwrite [projects_listing]...");
-    await databases.createDocument(
+    await (databases as Databases).createDocument(
       DATABASE_ID,
       'projects_listing',
       ID.unique(),
@@ -166,8 +173,9 @@ export async function createNews(formData: FormData) {
       content: formData.get('content') as string
     };
 
+    const { databases, DATABASE_ID } = getAppwrite();
     console.log("📡 Creating document in Appwrite [news_articles]...");
-    await databases.createDocument(
+    await (databases as Databases).createDocument(
       DATABASE_ID,
       'news_articles',
       ID.unique(),
@@ -184,6 +192,7 @@ export async function createNews(formData: FormData) {
 }
 export async function validateAdminLogin(username: string, password: string) {
   try {
+    const { databases, DATABASE_ID } = getAppwrite();
     console.log(`🔐 Attempting direct login for username: ${username}`);
     const response = await databases.listDocuments(
       DATABASE_ID,
@@ -217,7 +226,8 @@ export async function validateAdminLogin(username: string, password: string) {
 
 export async function getAdminProjects() {
   try {
-    const response = await databases.listDocuments(
+    const { databases, DATABASE_ID } = getAppwrite();
+    const response = await (databases as Databases).listDocuments(
       DATABASE_ID,
       'projects_listing',
       [Query.orderDesc('$createdAt'), Query.limit(100)]
@@ -232,7 +242,8 @@ export async function getAdminProjects() {
 
 export async function getAdminNews() {
   try {
-    const response = await databases.listDocuments(
+    const { databases, DATABASE_ID } = getAppwrite();
+    const response = await (databases as Databases).listDocuments(
       DATABASE_ID,
       'news_articles',
       [Query.orderDesc('$createdAt'), Query.limit(100)]
@@ -247,6 +258,7 @@ export async function getAdminNews() {
 
 export async function deleteProject(documentId: string) {
   try {
+    const { databases, DATABASE_ID } = getAppwrite();
     await databases.deleteDocument(DATABASE_ID, 'projects_listing', documentId);
     revalidatePath('/');
     return { success: true };
@@ -257,6 +269,7 @@ export async function deleteProject(documentId: string) {
 
 export async function deleteNews(documentId: string) {
   try {
+    const { databases, DATABASE_ID } = getAppwrite();
     await databases.deleteDocument(DATABASE_ID, 'news_articles', documentId);
     revalidatePath('/');
     return { success: true };
@@ -288,6 +301,7 @@ export async function updateProject(documentId: string, formData: FormData) {
       isFavorite: formData.get('isFavorite') === 'on'
     };
 
+    const { databases, DATABASE_ID } = getAppwrite();
     await databases.updateDocument(DATABASE_ID, 'projects_listing', documentId, data);
     revalidatePath('/');
     return { success: true };
@@ -316,6 +330,7 @@ export async function updateNews(documentId: string, formData: FormData) {
       content: formData.get('content') as string
     };
 
+    const { databases, DATABASE_ID } = getAppwrite();
     await databases.updateDocument(DATABASE_ID, 'news_articles', documentId, data);
     revalidatePath('/');
     return { success: true };
