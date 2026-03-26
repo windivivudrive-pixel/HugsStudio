@@ -24,6 +24,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://hugs-studio.vercel.app'),
   title: "HUGs STUDIO — Creative Digital Agency",
   description:
     "Premium creative digital agency specializing in brand identity, web design, motion design, and digital experiences. We craft bold, immersive solutions that make your brand unforgettable.",
