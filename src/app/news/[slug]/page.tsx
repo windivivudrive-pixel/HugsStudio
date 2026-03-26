@@ -14,7 +14,7 @@ interface Props {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
-  
+
   let article: Article | null = null;
 
   try {
@@ -25,21 +25,21 @@ export default async function ArticlePage({ params }: Props) {
       [Query.equal('slug', slug), Query.limit(1)]
     );
 
-      if (response.documents.length > 0) {
-        const doc = response.documents[0];
-        article = {
-          id: doc.$id,
-          slug: doc.slug,
-          title: doc.title,
-          date: doc.date,
-          category: doc.category,
-          image: doc.image,
-          content: doc.content,
-        };
-      }
-    } catch (error) {
-      console.error("Appwrite detail fetch failed:", error);
+    if (response.documents.length > 0) {
+      const doc = response.documents[0];
+      article = {
+        id: doc.$id,
+        slug: doc.slug,
+        title: doc.title,
+        date: doc.date,
+        category: doc.category,
+        image: doc.image,
+        content: doc.content,
+      };
     }
+  } catch (error) {
+    console.error("Appwrite detail fetch failed:", error);
+  }
 
   if (!article) {
     notFound();
@@ -53,10 +53,10 @@ export default async function ArticlePage({ params }: Props) {
     <>
       <main className="min-h-screen bg-obsidian text-white pt-24 pb-20 selection:bg-white/20 relative z-10">
         <article className="container mx-auto px-6 md:px-12 lg:px-24">
-          
+
           {/* Back Button */}
           <div className="mb-12">
-            <Link 
+            <Link
               href="/news"
               className="inline-flex items-center gap-2 font-body text-sm text-ash hover:text-white transition-colors group"
               data-cursor-hover
@@ -96,7 +96,7 @@ export default async function ArticlePage({ params }: Props) {
           {/* Article Content */}
           <div className="max-w-4xl mx-auto font-body text-lg text-ash leading-relaxed space-y-8">
             {/* Render HTML content safely */}
-            <div 
+            <div
               className="rich-text-content text-white/80 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: article.content.replace(/&nbsp;|\u00A0/g, ' ') }}
             />
@@ -107,7 +107,7 @@ export default async function ArticlePage({ params }: Props) {
               </h3>
               <div className="flex gap-4">
                 {['Twitter', 'LinkedIn', 'Facebook'].map((platform) => (
-                  <button 
+                  <button
                     key={platform}
                     className="px-6 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all text-sm font-heading"
                     data-cursor-hover
