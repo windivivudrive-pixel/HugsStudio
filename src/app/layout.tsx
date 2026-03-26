@@ -40,6 +40,21 @@ export const metadata: Metadata = {
     description:
       "Premium creative digital agency crafting bold, immersive digital experiences.",
     type: "website",
+    images: [
+      {
+        url: "/image/banner.png",
+        width: 1200,
+        height: 630,
+        alt: "HUGs STUDIO — Creative Digital Agency Banner",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "HUGs STUDIO — Creative Digital Agency",
+    description:
+      "Premium creative digital agency crafting bold, immersive digital experiences.",
+    images: ["/image/banner.png"],
   },
   icons: {
     icon: "/favicon-hugs.png",
