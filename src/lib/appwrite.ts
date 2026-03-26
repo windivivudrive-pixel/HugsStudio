@@ -8,9 +8,15 @@ if (!ENDPOINT || !PROJECT_ID) {
   console.warn('⚠️ Appwrite credentials missing. Please check your .env.local file.');
 }
 
-const client = new Client()
-    .setEndpoint(ENDPOINT)
-    .setProject(PROJECT_ID);
+const client = new Client();
+
+if (ENDPOINT && ENDPOINT.startsWith('http')) {
+    client.setEndpoint(ENDPOINT);
+}
+
+if (PROJECT_ID) {
+    client.setProject(PROJECT_ID);
+}
 
 export const databases = new Databases(client);
 export const storage = new Storage(client);

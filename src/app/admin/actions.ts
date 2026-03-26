@@ -10,10 +10,10 @@ let databases: Databases | null = null;
 function getAppwrite() {
   if (databases) return { databases, DATABASE_ID: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || '69ba2ae900156b378b6b' };
   
-  appwriteClient = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || '')
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || '')
-    .setKey(process.env.APPWRITE_API_KEY || '');
+  appwriteClient = new Client();
+  if (process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) appwriteClient.setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT);
+  if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) appwriteClient.setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID);
+  if (process.env.APPWRITE_API_KEY) appwriteClient.setKey(process.env.APPWRITE_API_KEY);
 
   databases = new Databases(appwriteClient);
   return { databases, DATABASE_ID: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || '69ba2ae900156b378b6b' };

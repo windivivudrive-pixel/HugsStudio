@@ -6,10 +6,10 @@ import { Client, Functions } from "node-appwrite";
 export async function POST(req: Request) {
   try {
     // 1. Initialize Appwrite Server Client inside handler to avoid build-time execution
-    const appwriteClient = new Client()
-      .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "")
-      .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "")
-      .setKey(process.env.APPWRITE_API_KEY || "");
+    const appwriteClient = new Client();
+    if (process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) appwriteClient.setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT);
+    if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) appwriteClient.setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID);
+    if (process.env.APPWRITE_API_KEY) appwriteClient.setKey(process.env.APPWRITE_API_KEY);
 
     const functions = new Functions(appwriteClient);
     const VERTEX_FUNCTION_ID = process.env.NEXT_PUBLIC_APPWRITE_VERTEX_FUNCTION_ID || "vertex-chatbot";
