@@ -24,6 +24,7 @@ export const APPWRITE_CONFIG = {
     NEWS: 'news_articles',
     PROJECTS: 'projects_listing',
     ADMIN_USERS: 'admin_users',
+    CHAT_LEADS: 'chat_leads',
   }
 };
 

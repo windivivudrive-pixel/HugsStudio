@@ -40,3 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .agent/
+
+# tmp files
+/tmp/
+
+# appwrite function dependencies
+functions/*/node_modules/
+functions/*/.env

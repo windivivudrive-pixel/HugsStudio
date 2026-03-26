@@ -17,11 +17,17 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Chào bạn 👋 Mình là trợ lý AI của HUGs STUDIO. Mình có thể giúp gì cho bạn hôm nay?",
+      content: "Chào Anh/Chị 👋 Em là Lễ tân của HUGs STUDIO ạ. Anh/Chị quan tâm đến dịch vụ chụp ảnh hay quay phim nào của bên em không ạ?",
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId] = useState(() => {
+    if (typeof window !== 'undefined' && window.crypto) {
+      return window.crypto.randomUUID();
+    }
+    return `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -46,7 +52,8 @@ export default function Chatbot() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: userMsg.content,
-          history: messages 
+          history: messages,
+          sessionId,
         }),
       });
 
@@ -56,11 +63,11 @@ export default function Chatbot() {
         setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
       } else {
         console.error(data.error);
-        setMessages((prev) => [...prev, { role: "assistant", content: "Xin lỗi, hiện tại đường truyền đang gặp chút sự cố. Bạn thử lại sau nhé." }]);
+        setMessages((prev) => [...prev, { role: "assistant", content: "Dạ xin lỗi Anh/Chị, hệ thống đang gặp chút sự cố. Anh/Chị thử nhắn lại sau giúp em nhé 🙏" }]);
       }
     } catch (error) {
       console.error(error);
-      setMessages((prev) => [...prev, { role: "assistant", content: "Xin lỗi, hiện tại đường truyền đang gặp chút sự cố. Bạn thử lại sau nhé." }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Dạ xin lỗi Anh/Chị, hệ thống đang gặp chút sự cố. Anh/Chị thử nhắn lại sau giúp em nhé 🙏" }]);
     } finally {
       setIsLoading(false);
     }
@@ -111,8 +118,8 @@ export default function Chatbot() {
                   />
                 </div>
                 <div>
-                  <h3 className="text-white text-sm font-medium leading-none">HUGs Assistant</h3>
-                  <span className="text-xs text-white/50 mt-1 block">AI Agent</span>
+                  <h3 className="text-white text-sm font-medium leading-none">Lễ Tân HUGS</h3>
+                  <span className="text-xs text-white/50 mt-1 block">Tư vấn dịch vụ</span>
                 </div>
               </div>
               <button 
@@ -177,7 +184,7 @@ export default function Chatbot() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Hỏi mình bất cứ điều gì..."
+                  placeholder="Anh/Chị cần tư vấn gì ạ..."
                   className="w-full bg-[#111] border border-[#333] focus:border-white/40 transition-colors text-white text-sm rounded-full py-2.5 pl-4 pr-12 outline-none placeholder:text-white/30"
                   disabled={isLoading}
                 />
@@ -190,7 +197,7 @@ export default function Chatbot() {
                 </button>
               </div>
               <div className="text-center mt-2">
-                <p className="text-[10px] text-white/30">Powered by Google Vertex AI</p>
+                <p className="text-[10px] text-white/30">HUGs STUDIO ❤️</p>
               </div>
             </div>
           </motion.div>

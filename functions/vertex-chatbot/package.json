@@ -1,0 +1,11 @@
+{
+  "name": "vertex-chatbot",
+  "version": "1.0.0",
+  "description": "HUGS STUDIO Chatbot using Vertex AI and Appwrite",
+  "main": "src/main.js",
+  "type": "module",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "node-appwrite": "^13.0.0"
+  }
+}
