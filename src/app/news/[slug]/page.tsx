@@ -45,7 +45,7 @@ export default async function ArticlePage({ params }: Props) {
     notFound();
   }
 
-  // Calculate read time roughly (strip tags first)
+  // Calculate read time roughly (strip tags first )
   const plainText = article.content.replace(/<[^>]*>/g, '');
   const readTime = Math.max(1, Math.ceil(plainText.split(' ').length / 200));
 
