@@ -29,32 +29,32 @@ const slides: Slide[] = [
   {
     id: 1,
     title: "HUGs STUDIO",
-    subtitle: "Studio Nhiếp Ảnh Chuyên Nghiệp",
-    category: "NHIẾP ẢNH / QUAY PHIM / SÁNG TẠO",
+    subtitle: "Quay phim/ Chụp ảnh/ Sáng tạo nội dung",
+    category: "",
     gradient: "from-zinc-900/20 via-black/40 to-black/80",
     video: "/image/video1.mp4",
   },
   {
     id: 2,
-    title: "HÌNH ẢNH\nTHƯƠNG HIỆU",
-    subtitle: "Kiến Tạo Hình Ảnh Đẳng Cấp",
-    category: "CHỤP ẢNH DOANH NGHIỆP",
+    title: "THĂNG HẠNG\nVISUAL",
+    subtitle: "Nâng Tầm Thương Hiệu",
+    category: "",
     gradient: "from-neutral-900/20 via-black/40 to-black/80",
     video: "/image/video2.mp4",
   },
   {
     id: 3,
-    title: "KHOẢNH KHẮC\nẤN TƯỢNG",
-    subtitle: "Lưu Giữ Cảm Xúc Chân Thực",
-    category: "CHỤP ẢNH CHÂN DUNG",
+    title: "KHẲNG ĐỊNH\nTHƯƠNG HIỆU",
+    subtitle: "Mỗi dự án là một dấu ấn riêng",
+    category: "",
     gradient: "from-stone-900/40 via-black/60 to-black",
     image: "/image/banner.png",
   },
   {
     id: 4,
     title: "QUAY PHIM\n& TVC",
-    subtitle: "Kể Câu Chuyện Bằng Hình Ảnh",
-    category: "SẢN XUẤT VIDEO",
+    subtitle: "Sẵn sàng kể câu chuyện của bạn theo cách chưa từng có",
+    category: "",
     gradient: "from-gray-900/40 via-black/60 to-black",
     image: "/image/banner 2.jpg",
   },
@@ -224,15 +224,19 @@ export default function HeroSlider() {
               {slides[currentSlide].category}
             </motion.span>
 
-            {/* Title */}
-            <motion.h1
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.7 }}
-              className="font-heading text-5xl md:text-7xl lg:text-[8rem] font-bold leading-[0.9] tracking-tight whitespace-pre-line mb-4 md:mb-6"
-            >
-              {slides[currentSlide].title}
-            </motion.h1>
+            {(() => {
+              const isTwoLines = slides[currentSlide].title.includes('\n');
+              return (
+                <motion.h1
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.7 }}
+                  className={`font-heading text-5xl md:text-7xl ${isTwoLines ? 'lg:text-[7.2rem]' : 'lg:text-[8rem]'} font-bold leading-[1] md:leading-[0.95] tracking-tight whitespace-pre-line mb-4 md:mb-6`}
+                >
+                  {slides[currentSlide].title}
+                </motion.h1>
+              );
+            })()}
 
             {/* Subtitle */}
             <motion.p

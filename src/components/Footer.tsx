@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, useMotionTemplate, useMotionValue, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -8,13 +9,77 @@ import Link from "next/link";
  * Footer — Large CTA headline with glass-styled contact form and social links.
  * Features:
  * - Bold call-to-action headline
- * - Glassmorphic contact form
+ * - Glassmorphic contact form with custom service dropdown
+ * - Google Forms backend integration
  * - Social links row
  * - Reveal-on-scroll animation
  */
+
+
+const SERVICE_OPTIONS = [
+  "ẢNH F&B",
+  "CHỤP ẢNH TÁCH NỀN",
+  "PROFILE CÁ NHÂN/DOANH NGHIỆP",
+  "ẢNH LIFESTYLE",
+  "ẢNH BEAUTY",
+  "ẢNH BRANDING",
+  "CHỤP ẢNH SỰ KIỆN",
+  "QUAY TVC",
+];
+
 export default function Footer() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+
+  // Form state
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [service, setService] = useState("");
+  const [message, setMessage] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [submitState, setSubmitState] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name || !email || !phone || !service || !message) return;
+
+    setSubmitState("sending");
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone, service, message }),
+      });
+
+      if (!res.ok) throw new Error("Submit failed");
+
+      setSubmitState("success");
+      setName("");
+      setEmail("");
+      setPhone("");
+      setService("");
+      setMessage("");
+
+      setTimeout(() => setSubmitState("idle"), 4000);
+    } catch {
+      setSubmitState("error");
+      setTimeout(() => setSubmitState("idle"), 4000);
+    }
+  }
 
   function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
     const { left, top } = currentTarget.getBoundingClientRect();
@@ -23,7 +88,7 @@ export default function Footer() {
   }
 
   return (
-    <footer id="contact" className="relative pt-24 md:pt-32 pb-8 md:pb-10 px-6 md:px-16 lg:px-24 overflow-hidden border-t border-white/10 bg-obsidian">
+    <footer id="contact" className="relative pt-24 md:pt-32 pb-8 md:pb-10 overflow-hidden border-t border-white/10 bg-obsidian">
       {/* Background glows (High intensity for "Radiant" effect) */}
       <div
         className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] pointer-events-none"
@@ -42,7 +107,7 @@ export default function Footer() {
         }}
       />
 
-      <div className="max-w-[1400px] mx-auto relative z-10">
+      <div className="max-w-[1200px] mx-auto relative z-10 px-4 md:px-6">
         <div className="flex gap-16 lg:gap-8 flex-col-reverse lg:flex-row mb-16 md:mb-20">
           
           {/* Left Column (Typography & Links) */}
@@ -165,31 +230,120 @@ export default function Footer() {
                 <h3 className="text-2xl font-heading font-medium text-center mb-10">
                   Làm việc cùng chúng tôi
                 </h3>
-                <form className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <input
                     type="text"
                     placeholder="Họ và tên"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
                     className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl px-5 py-4 font-body text-[15px] text-white placeholder-ash focus:outline-none focus:border-white/40 hover:border-white/20 hover:bg-white/[0.05] transition-all duration-300"
                   />
                   <input
                     type="email"
                     placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                     className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl px-5 py-4 font-body text-[15px] text-white placeholder-ash focus:outline-none focus:border-white/40 hover:border-white/20 hover:bg-white/[0.05] transition-all duration-300"
                   />
+                  <input
+                    type="tel"
+                    placeholder="Số điện thoại"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl px-5 py-4 font-body text-[15px] text-white placeholder-ash focus:outline-none focus:border-white/40 hover:border-white/20 hover:bg-white/[0.05] transition-all duration-300"
+                  />
+
+                  {/* Custom Service Dropdown */}
+                  <div ref={dropdownRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                      className={`w-full bg-white/[0.03] border rounded-2xl px-5 py-4 font-body text-[15px] text-left flex items-center justify-between transition-all duration-300 hover:border-white/20 hover:bg-white/[0.05] focus:outline-none ${
+                        dropdownOpen ? "border-white/40" : "border-white/[0.08]"
+                      } ${service ? "text-white" : "text-ash"}`}
+                      data-cursor-hover
+                    >
+                      <span>{service || "Chọn dịch vụ"}</span>
+                      <motion.svg
+                        animate={{ rotate: dropdownOpen ? 180 : 0 }}
+                        transition={{ duration: 0.2 }}
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        className="text-ash flex-shrink-0 ml-2"
+                      >
+                        <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </motion.svg>
+                    </button>
+
+                    <AnimatePresence>
+                      {dropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                          className="absolute top-full left-0 right-0 mt-2 bg-[#1a1a1a] border border-white/[0.1] rounded-2xl overflow-hidden z-50 shadow-[0_16px_48px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+                        >
+                          <div className="py-2 max-h-[240px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+                            {SERVICE_OPTIONS.map((option) => (
+                              <button
+                                key={option}
+                                type="button"
+                                onClick={() => {
+                                  setService(option);
+                                  setDropdownOpen(false);
+                                }}
+                                className={`w-full text-left px-5 py-3 font-body text-[14px] transition-all duration-200 hover:bg-white/[0.06] ${
+                                  service === option
+                                    ? "text-white bg-white/[0.05]"
+                                    : "text-ash hover:text-white"
+                                }`}
+                                data-cursor-hover
+                              >
+                                {option}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
                   <textarea
-                    rows={6}
+                    rows={4}
                     placeholder="Chúng tôi có thể giúp gì cho bạn?"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    required
                     className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl px-5 py-4 font-body text-[15px] text-white placeholder-ash focus:outline-none focus:border-white/40 hover:border-white/20 hover:bg-white/[0.05] transition-all duration-300 resize-none"
                   />
                   
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    whileHover={{ scale: submitState === "idle" ? 1.02 : 1 }}
+                    whileTap={{ scale: submitState === "idle" ? 0.98 : 1 }}
                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    className="w-full py-4 mt-4 bg-white text-black font-heading font-semibold text-[15px] rounded-2xl hover:bg-white-dim transition-colors duration-300"
+                    disabled={submitState !== "idle"}
+                    className={`w-full py-4 mt-4 font-heading font-semibold text-[15px] rounded-2xl transition-all duration-300 ${
+                      submitState === "success"
+                        ? "bg-emerald-500 text-white"
+                        : submitState === "error"
+                        ? "bg-red-500 text-white"
+                        : submitState === "sending"
+                        ? "bg-white/50 text-black/50 cursor-wait"
+                        : "bg-white text-black hover:bg-white-dim"
+                    }`}
                     data-cursor-hover
                   >
-                    Gửi Tin Nhắn
+                    {submitState === "sending" && "Đang gửi..."}
+                    {submitState === "success" && "✓ Đã gửi thành công!"}
+                    {submitState === "error" && "Có lỗi xảy ra, thử lại"}
+                    {submitState === "idle" && "Gửi Tin Nhắn"}
                   </motion.button>
                 </form>
               </div>

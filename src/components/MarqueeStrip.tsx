@@ -17,12 +17,14 @@ interface MarqueeStripProps {
 }
 
 const defaultItems = [
-  "Chụp Ảnh Sản Phẩm",
-  "Quay TVC/Quảng Cáo",
-  "Ảnh Concept",
-  "Hồ Sơ Doanh Nghiệp",
-  "Chụp Ảnh Thời Trang",
-  "Ảnh Quảng Cáo",
+  "ẢNH F&B",
+  "CHỤP ẢNH TÁCH NỀN",
+  "PROFILE CÁ NHÂN/DOANH NGHIỆP",
+  "ẢNH LIFESTYLE",
+  "ẢNH BEAUTY",
+  "ẢNH BRANDING",
+  "CHỤP ẢNH SỰ KIỆN",
+  "QUAY TVC",
 ];
 
 export default function MarqueeStrip({

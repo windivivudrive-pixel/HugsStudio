@@ -6,42 +6,42 @@ import { useState, useRef, useEffect } from "react";
 const testimonials = [
   {
     id: 1,
-    name: "Đặng Hoàng Nam",
-    role: "Giám đốc ABC Studios",
-    content: "Quy trình làm việc rất bài bản và hiệu quả. Các ý tưởng được chuyển hóa thành giao diện tinh tế một cách nhanh chóng, cùng với những đóng góp giúp cải thiện dự án so với kế hoạch ban đầu.",
-    avatar: "https://i.pravatar.cc/150?u=1",
+    name: "Quân Nguyễn",
+    role: "Co-Founder | Đà Nẵng",
+    content: "“Hình ảnh bên HUGs Studio làm rất ấn tượng, concept sáng tạo và bắt trend tốt. Team làm việc chuyên nghiệp, support nhiệt tình từ đầu đến cuối.”",
+    avatar: "/image/reviewer1.jpg",
     stars: 5,
   },
   {
     id: 2,
-    name: "Lê Minh Phương",
-    role: "Quản lý Sản phẩm",
-    content: "Thời gian hoàn thành nhanh chóng nhưng vẫn đảm bảo chất lượng tuyệt vời. Sản phẩm cuối cùng rất dễ bàn giao và vận hành mượt mà cùng đội ngũ phát triển của chúng tôi.",
-    avatar: "https://i.pravatar.cc/150?u=2",
+    name: "Lâm Quang Thơ",
+    role: "Manager F&B | Đà Nẵng",
+    content: "“Là người làm F&B lâu năm và quản lý nhiều hệ thống nightlife tại Đà Nẵng, tôi rất tin tưởng giao HUGs Studio chụp các sản phẩm food & drink cho dự án của mình. Hình ảnh đẹp, concept tốt và team làm việc rất chuyên nghiệp.”",
+    avatar: "/image/reviewer2.jpg",
     stars: 5,
   },
   {
     id: 3,
-    name: "Nguyễn Thu Hà",
-    role: "Nhà thiết kế",
-    content: "Sự tỉ mỉ và trau chuốt trong từng chi tiết thực sự ấn tượng. Mỗi màn hình đều mang lại cảm giác có chủ đích, nhất quán và được thiết kế chu đáo trên mọi thiết bị.",
-    avatar: "https://i.pravatar.cc/150?u=3",
+    name: "Tammy Bui",
+    role: "Account Manager | TP.HCM",
+    content: "“Quy trình làm việc rõ ràng, team nhiều idea mới lạ và linh hoạt theo yêu cầu. Sản phẩm đầu ra chỉn chu, phù hợp cho campaign.”",
+    avatar: "/image/reviewer4.png",
     stars: 5,
   },
   {
     id: 4,
-    name: "Trần Anh Quân",
-    role: "Founder & CEO, Techflow",
-    content: "HUGs STUDIO không chỉ là đơn vị thiết kế, họ là những đối tác chiến lược. Tầm nhìn sáng tạo của họ đã giúp brand của chúng tôi vươn tầm quốc tế chỉ sau một năm.",
-    avatar: "https://i.pravatar.cc/150?u=4",
+    name: "Anh Quân",
+    role: "Freelancer | Huế",
+    content: "“Mình đảm nhận nhiều dự án freelancer lớn nên thường cần outsource phần hình ảnh. HUGs Studio luôn là lựa chọn ưu tiên khi cần chụp ảnh và quay video, sản phẩm đẹp và team làm việc rất chuyên nghiệp.”",
+    avatar: "/image/reviewer3.png",
     stars: 5,
   },
   {
     id: 5,
-    name: "Phạm Thảo Vy",
-    role: "Giám đốc Marketing",
-    content: "Khả năng nắm bắt insight và chuyển hóa thành ngôn ngữ hình ảnh cực kỳ tốt. Chúng tôi hoàn toàn hài lòng với kết quả cuối cùng và chắc chắn sẽ còn hợp tác lâu dài.",
-    avatar: "https://i.pravatar.cc/150?u=5",
+    name: "Hà Thu Uyên",
+    role: "Model | Đà Nẵng",
+    content: "“HUGs Studio luôn là lựa chọn ưu tiên của mình khi cần chụp ảnh cá nhân hoặc các job hợp tác cùng brand. Very good.”",
+    avatar: "/image/reviewer5.png",
     stars: 5,
   }
 ];
@@ -63,7 +63,7 @@ function TestimonialCard({ t, i }: { t: typeof testimonials[0]; i: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.02 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ 
+      transition={{
         opacity: { duration: 0.6, delay: i * 0.1 },
         y: { duration: 0.6, delay: i * 0.1 },
         scale: { type: "spring", stiffness: 300, damping: 20 },
@@ -95,8 +95,8 @@ function TestimonialCard({ t, i }: { t: typeof testimonials[0]; i: number }) {
 
       {/* Card Content */}
       <div className="flex flex-col h-full relative z-10">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0">
+        <div className="flex items-center gap-5 mb-8">
+          <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/5 border border-white/10 shrink-0">
             <img src={t.avatar} alt={t.name} className="w-full h-full object-cover block" />
           </div>
           <div>
@@ -104,7 +104,7 @@ function TestimonialCard({ t, i }: { t: typeof testimonials[0]; i: number }) {
             <p className="font-body text-ash text-sm">{t.role}</p>
           </div>
         </div>
-        
+
         <p className="font-body text-[17px] leading-relaxed text-white/90 mb-10 flex-1">
           {t.content}
         </p>
@@ -113,7 +113,7 @@ function TestimonialCard({ t, i }: { t: typeof testimonials[0]; i: number }) {
         <div className="flex gap-1 mt-auto pb-2">
           {[...Array(t.stars)].map((_, idx) => (
             <svg key={idx} width="16" height="16" viewBox="0 0 24 24" fill="url(#icon-grad)" className="opacity-90 group-hover:opacity-100 group-hover:drop-shadow-[0_0_5px_rgba(255,255,255,0.2)] transition-all duration-300">
-              <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279L12 19.446l-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/>
+              <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279L12 19.446l-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" />
             </svg>
           ))}
         </div>
@@ -223,10 +223,10 @@ export default function TestimonialsSection() {
       </svg>
 
       <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 md:mb-24 gap-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -242,22 +242,22 @@ export default function TestimonialsSection() {
 
           {/* Navigation Controls */}
           <div className="flex items-center gap-4 relative z-10">
-            <button 
+            <button
               onClick={prev}
               className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors group"
               data-cursor-hover
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="stroke-white/60 group-hover:stroke-white transition-colors">
-                <path d="M15 18L9 12L15 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 18L9 12L15 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
-            <button 
+            <button
               onClick={next}
               className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors group"
               data-cursor-hover
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="stroke-white/60 group-hover:stroke-white transition-colors">
-                <path d="M9 18L15 12L9 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9 18L15 12L9 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
@@ -277,7 +277,7 @@ export default function TestimonialsSection() {
             onAnimationComplete={handleAnimationComplete}
           >
             {cloned.map((t, ci) => (
-              <div 
+              <div
                 key={`${t.id}-${ci}`}
                 className="shrink-0"
                 style={{ width: itemWidth > 0 ? itemWidth : `calc((100% - ${(visibleItems - 1) * GAP}px) / ${visibleItems})` }}
@@ -294,9 +294,8 @@ export default function TestimonialsSection() {
             <button
               key={i}
               onClick={() => setRawIndex(i + visibleItems)}
-              className={`h-1.5 rounded-full transition-all duration-500 ${
-                i === realIndex ? "w-8 bg-white" : "w-4 bg-white/10 hover:bg-white/20"
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-500 ${i === realIndex ? "w-8 bg-white" : "w-4 bg-white/10 hover:bg-white/20"
+                }`}
               data-cursor-hover
             />
           ))}

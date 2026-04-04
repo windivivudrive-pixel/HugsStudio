@@ -7,6 +7,7 @@ import { databases, APPWRITE_CONFIG } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import { Loader2, AlertCircle, LogOut, Edit2, Trash2, ExternalLink } from "lucide-react";
 import SeoAnalyzer from "@/components/SeoAnalyzer";
+import imageCompression from "browser-image-compression";
 
 // Dynamically import react-quill-new to avoid SSR issues
 const ReactQuill = dynamic(
@@ -48,6 +49,9 @@ export default function AdminPage() {
   const [currentTitle, setCurrentTitle] = useState("");
   const [currentDescription, setCurrentDescription] = useState("");
 
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [existingGallery, setExistingGallery] = useState<string[]>([]);
+
   const projectQuillRef = useRef<any>(null);
   const newsQuillRef = useRef<any>(null);
 
@@ -83,6 +87,8 @@ export default function AdminPage() {
     setFullDescription(doc.fullDescription || "");
     setCurrentTitle(doc.title || "");
     setCurrentDescription(doc.description || "");
+    setGalleryFiles([]);
+    setExistingGallery(doc.gallery || []);
     setStatus({ type: null, message: "" });
   };
 
@@ -110,11 +116,22 @@ export default function AdminPage() {
 
   // Helper to upload image to R2 and return URL
   const uploadImageToR2 = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await uploadSingleFileAction(formData);
-    if (res.success && res.url) return res.url;
-    throw new Error(res.error || "Upload failed");
+    try {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      const formData = new FormData();
+      formData.append("file", compressedFile, file.name || "image.png");
+      const res = await uploadSingleFileAction(formData);
+      if (res.success && res.url) return res.url;
+      throw new Error(res.error || "Upload failed");
+    } catch (err: any) {
+      console.error("Image upload/compression failed:", err);
+      throw err;
+    }
   };
 
   // Custom Image Handler for Quill toolbar
@@ -266,10 +283,43 @@ export default function AdminPage() {
 
   async function handleProjectSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setIsSubmitting(true);
     setStatus({ type: null, message: "" });
     try {
-      const formData = new FormData(e.currentTarget);
+      const formData = new FormData(form);
+      
+      const imageFile = formData.get("image") as File;
+      if (imageFile && imageFile.size > 0) {
+        try {
+          const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
+          const compressedFile = await imageCompression(imageFile, options);
+          formData.set("image", compressedFile, imageFile.name);
+        } catch (error) {
+          console.error("Error compressing cover image:", error);
+        }
+      }
+
+      // Upload gallery files
+      const uploadedGalleryUrls = [];
+      if (galleryFiles.length > 0) {
+        setStatus({ type: "success", message: `Đang tải lên ${galleryFiles.length} hình ảnh gallery...` });
+        try {
+          const urls = await Promise.all(galleryFiles.map(file => uploadImageToR2(file)));
+          uploadedGalleryUrls.push(...urls);
+        } catch (err) {
+          console.error("Error uploading gallery images:", err);
+          setStatus({ type: "error", message: "Lỗi khi upload hình ảnh gallery!" });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
+      const finalGallery = [...existingGallery, ...uploadedGalleryUrls];
+      if (finalGallery.length > 0) {
+        formData.set("gallery", JSON.stringify(finalGallery));
+      }
+
       formData.set("fullDescription", fullDescription);
       
       let result;
@@ -282,15 +332,19 @@ export default function AdminPage() {
       if (result.success) {
           setStatus({ type: "success", message: editingDoc ? "🎉 Project updated successfully!" : "🎉 Project created successfully!" });
           if (!editingDoc) {
-            e.currentTarget.reset();
+            form.reset();
             setFullDescription("");
             setCurrentTitle("");
             setCurrentDescription("");
+            setGalleryFiles([]);
+            setExistingGallery([]);
           }
           // Reset form view after success
           setTimeout(() => {
             setEditingDoc(null);
             setShowForm(false);
+            setGalleryFiles([]);
+            setExistingGallery([]);
           }, 1500);
       } else {
           setStatus({ type: "error", message: result.error || "Failed to process project." });
@@ -304,10 +358,23 @@ export default function AdminPage() {
 
   async function handleNewsSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setIsSubmitting(true);
     setStatus({ type: null, message: "" });
     try {
-      const formData = new FormData(e.currentTarget);
+      const formData = new FormData(form);
+
+      const imageFile = formData.get("image") as File;
+      if (imageFile && imageFile.size > 0) {
+        try {
+          const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
+          const compressedFile = await imageCompression(imageFile, options);
+          formData.set("image", compressedFile, imageFile.name);
+        } catch (error) {
+          console.error("Error compressing cover image:", error);
+        }
+      }
+
       formData.set("content", newsContent);
       
       let result;
@@ -320,7 +387,7 @@ export default function AdminPage() {
       if (result.success) {
           setStatus({ type: "success", message: editingDoc ? "🎉 News updated successfully!" : "🎉 News created successfully!" });
           if (!editingDoc) {
-            e.currentTarget.reset();
+            form.reset();
             setNewsContent("");
             setCurrentTitle("");
           }
@@ -423,13 +490,13 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="flex gap-4 mb-8 border-b border-white/10 pb-4">
           <button
-            onClick={() => { setActiveTab("projects"); setShowForm(false); setEditingDoc(null); setStatus({ type: null, message: "" }); }}
+            onClick={() => { setActiveTab("projects"); setShowForm(false); setEditingDoc(null); setStatus({ type: null, message: "" }); setGalleryFiles([]); setExistingGallery([]); }}
             className={`px-6 py-2 font-heading tracking-wide transition-colors ${activeTab === "projects" ? "text-white border-b-2 border-white" : "text-ash hover:text-white"}`}
           >
             Dự án
           </button>
           <button
-            onClick={() => { setActiveTab("news"); setShowForm(false); setEditingDoc(null); setStatus({ type: null, message: "" }); }}
+            onClick={() => { setActiveTab("news"); setShowForm(false); setEditingDoc(null); setStatus({ type: null, message: "" }); setGalleryFiles([]); setExistingGallery([]); }}
             className={`px-6 py-2 font-heading tracking-wide transition-colors ${activeTab === "news" ? "text-white border-b-2 border-white" : "text-ash hover:text-white"}`}
           >
             Tin tức
@@ -456,7 +523,16 @@ export default function AdminPage() {
                      <h2 className="text-xl font-heading font-semibold">Danh sách Dự án</h2>
                    </div>
                    <button 
-                    onClick={() => { setShowForm(true); setEditingDoc(null); setStatus({ type: null, message: "" }); }}
+                    onClick={() => { 
+                      setShowForm(true); 
+                      setEditingDoc(null); 
+                      setStatus({ type: null, message: "" }); 
+                      setGalleryFiles([]); 
+                      setExistingGallery([]);
+                      setFullDescription("");
+                      setCurrentTitle("");
+                      setCurrentDescription("");
+                    }}
                     className="px-5 py-2.5 bg-white text-black rounded-full font-heading font-bold hover:bg-white-dim transition-all flex items-center gap-2"
                    >
                     + Thêm Dự án Mới
@@ -542,6 +618,66 @@ export default function AdminPage() {
                           <textarea required name="description" value={currentDescription} onChange={e => setCurrentDescription(e.target.value)} rows={2} className="bg-[#141414] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-white/40 resize-none"></textarea>
                       </div>
                       
+                      <div className="flex flex-col gap-2 text-white relative z-0">
+                          <label className="text-sm font-medium text-ash">Project Gallery Images (Multiple)</label>
+                          <div className="bg-[#141414] border border-dashed border-white/20 hover:border-white/40 transition-colors rounded-xl p-6 relative flex flex-col items-center justify-center min-h-[150px]">
+                            <p className="text-white/50 text-center mb-4">Drag and drop images here, or click to select files</p>
+                            <input 
+                              type="file" 
+                              multiple 
+                              accept="image/*" 
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              onChange={(e) => {
+                                if (e.target.files) {
+                                  setGalleryFiles(prev => [...prev, ...Array.from(e.target.files as FileList)]);
+                                }
+                              }} 
+                            />
+                            
+                            {/* Existing Images */}
+                            {existingGallery.length > 0 && (
+                                <div className="w-full mb-4">
+                                  <h4 className="text-xs font-semibold text-white/40 mb-2 uppercase tracking-wide">Existing Images</h4>
+                                  <div className="flex flex-wrap gap-3">
+                                    {existingGallery.map((url, i) => (
+                                      <div key={`existing-${i}`} className="relative group w-20 h-20 rounded-md overflow-hidden bg-black/50 border border-white/10">
+                                        <img src={url} alt="" className="w-full h-full object-cover" />
+                                        <button 
+                                          type="button" 
+                                          onClick={(e) => { e.preventDefault(); setExistingGallery(prev => prev.filter((_, idx) => idx !== i)); }}
+                                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                            )}
+
+                            {/* Pending Images */}
+                            {galleryFiles.length > 0 && (
+                                <div className="w-full max-h-48 overflow-y-auto mt-2">
+                                  <h4 className="text-xs font-semibold text-blue-400 mb-2 uppercase tracking-wide">Pending Uploads ({galleryFiles.length})</h4>
+                                  <div className="flex flex-wrap gap-3">
+                                    {galleryFiles.map((file, i) => (
+                                      <div key={`pending-${i}`} className="relative group w-20 h-20 rounded-md overflow-hidden bg-black/50 border border-blue-500/30">
+                                        <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
+                                        <button 
+                                          type="button" 
+                                          onClick={(e) => { e.preventDefault(); setGalleryFiles(prev => prev.filter((_, idx) => idx !== i)); }}
+                                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-100"
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                            )}
+                          </div>
+                      </div>
+
                       <div className="flex flex-col gap-2 text-black relative z-0">
                           <label className="text-sm font-medium text-white/60">Full Content</label>
                           <div className="bg-white rounded-lg overflow-hidden">
@@ -559,7 +695,7 @@ export default function AdminPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                         <div className="flex flex-col gap-2">
                           <label className="text-sm font-medium text-ash">Tags (comma separated)</label>
-                          <input required type="text" name="tags" defaultValue={editingDoc?.tags} placeholder="UI/UX, Danh thiếp" className="bg-[#141414] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-white/40" />
+                          <input type="text" name="tags" defaultValue={editingDoc?.tags} placeholder="UI/UX, Danh thiếp" className="bg-[#141414] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-white/40" />
                         </div>
                       </div>
 
@@ -604,7 +740,13 @@ export default function AdminPage() {
                      <h2 className="text-xl font-heading font-semibold">Danh sách Tin tức</h2>
                    </div>
                    <button 
-                    onClick={() => { setShowForm(true); setEditingDoc(null); setStatus({ type: null, message: "" }); }}
+                    onClick={() => { 
+                      setShowForm(true); 
+                      setEditingDoc(null); 
+                      setStatus({ type: null, message: "" });
+                      setNewsContent("");
+                      setCurrentTitle("");
+                    }}
                     className="px-5 py-2.5 bg-white text-black rounded-full font-heading font-bold hover:bg-white-dim transition-all flex items-center gap-2"
                    >
                     + Thêm Tin tức Mới

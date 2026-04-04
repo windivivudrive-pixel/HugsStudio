@@ -132,17 +132,17 @@ export default function ProjectsPage() {
         if (response.documents.length > 0) {
           const fetchedProjects: Project[] = response.documents.map((doc: any) => ({
             id: doc.$id,
-            slug: doc.slug,
-            title: doc.title,
-            category: doc.category,
-            year: doc.year,
-            color: doc.color,
-            image: doc.image,
-            description: doc.description,
-            fullDescription: doc.fullDescription,
+            slug: doc.slug || "",
+            title: doc.title || "",
+            category: doc.category || "",
+            year: doc.year || "",
+            color: doc.color || "",
+            image: doc.image || "",
+            description: doc.description || "",
+            fullDescription: doc.fullDescription || "",
             tags: typeof doc.tags === 'string' ? doc.tags.split(",").map((t: string) => t.trim()) : (Array.isArray(doc.tags) ? doc.tags : []),
-            span: doc.span,
-            aspect: doc.aspect,
+            span: doc.span || "",
+            aspect: doc.aspect || "",
           }));
           setProjects(fetchedProjects);
         } else {
@@ -207,8 +207,7 @@ export default function ProjectsPage() {
               </div>
 
               <p className="font-body text-base text-ash max-w-md leading-relaxed">
-                Mỗi dự án đều là sự kết hợp giữa chiến lược, sáng tạo và kỹ thuật —
-                mang đến trải nghiệm số đáng nhớ cho các thương hiệu.
+
               </p>
             </div>
           </motion.div>

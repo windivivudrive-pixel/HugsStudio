@@ -44,26 +44,45 @@ export default function ProjectDetailPage({ params }: Props) {
           setProject({
             id: doc.$id,
             slug: doc.slug,
-            title: doc.title,
-            category: doc.category,
-            year: doc.year,
-            color: doc.color,
-            image: doc.image,
-            description: doc.description,
-            fullDescription: doc.fullDescription,
-            tags: tags,
-            span: doc.span,
-            aspect: doc.aspect
+            title: doc.title || "",
+            category: doc.category || "",
+            year: doc.year || "",
+            color: doc.color || "",
+            image: doc.image || "",
+            description: doc.description || "",
+            fullDescription: doc.fullDescription || "",
+            tags: Array.isArray(tags) ? tags : [],
+            gallery: doc.gallery || [],
+            span: doc.span || "",
+            aspect: doc.aspect || ""
           });
         } else {
           // 2. Try Mock Data
           const mock = projectsData.find((p) => p.slug === slug);
-          setProject(mock || null);
+          if (mock) {
+            setProject({
+              ...mock,
+              fullDescription: mock.fullDescription || "",
+              tags: mock.tags || [],
+              gallery: mock.gallery || []
+            });
+          } else {
+            setProject(null);
+          }
         }
       } catch (err) {
         console.warn("Appwrite project fetch failed:", err);
         const mock = projectsData.find((p) => p.slug === slug);
-        setProject(mock || null);
+        if (mock) {
+          setProject({
+            ...mock,
+            fullDescription: mock.fullDescription || "",
+            tags: mock.tags || [],
+            gallery: mock.gallery || []
+          });
+        } else {
+          setProject(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -83,6 +102,20 @@ export default function ProjectDetailPage({ params }: Props) {
   if (!project) {
     notFound();
   }
+
+  const rawContent = (project.fullDescription || "").replace(/&nbsp;|\u00A0/g, ' ');
+  const imgUrlRegex = /<img[^>]+src="([^">]+)"/g;
+  const richTextImageUrls = Array.from(rawContent.matchAll(imgUrlRegex)).map(match => match[1]);
+  
+  // Combine gallery images with legacy rich text images to support older posts
+  const allImageUrls = [...(project.gallery || []), ...richTextImageUrls];
+
+  // Remove <img> tags, then remove empty <p> tags
+  const textOnlyContent = rawContent
+    .replace(/<img[^>]+>/g, '')
+    .replace(/<p>[\s\n]*(?:<br\s*\/?>)?[\s\n]*<\/p>/g, '')
+    .trim();
+  const hasTextContent = textOnlyContent.length > 0;
 
   return (
     <>
@@ -135,7 +168,7 @@ export default function ProjectDetailPage({ params }: Props) {
             className="relative w-full aspect-[21/9] md:aspect-[3/1] max-w-6xl mx-auto rounded-3xl overflow-hidden mb-20 bg-white/5 border border-white/10"
           >
             <Image
-              src={project.image}
+              src={project.image || "/image/placeholder.png"}
               alt={project.title}
               fill
               className="object-cover"
@@ -145,14 +178,43 @@ export default function ProjectDetailPage({ params }: Props) {
 
           {/* Project Content */}
           <div className="max-w-4xl mx-auto">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="rich-text-content font-body text-lg text-white/80 leading-relaxed space-y-8 mb-16"
-              dangerouslySetInnerHTML={{ __html: project.fullDescription.replace(/&nbsp;|\u00A0/g, ' ') }}
-            />
+            {hasTextContent && (
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="rich-text-content font-body text-lg text-white/80 leading-relaxed mb-16"
+                dangerouslySetInnerHTML={{ __html: textOnlyContent }}
+              />
+            )}
+          </div>
+          
+          {/* Project Image Gallery (Creative Masonry Layout) */}
+          {allImageUrls.length > 0 && (
+            <div className="max-w-7xl mx-auto mb-20 px-4 md:px-0">
+               <motion.div 
+                 initial={{ opacity: 0, y: 40 }}
+                 whileInView={{ opacity: 1, y: 0 }}
+                 viewport={{ once: true }}
+                 transition={{ duration: 0.6 }}
+                 className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6"
+               >
+                 {allImageUrls.map((url, idx) => (
+                   <div key={idx} className="break-inside-avoid relative rounded-3xl overflow-hidden group border border-white/10 bg-white/5 shadow-2xl">
+                     <img
+                       src={url}
+                       alt={`${project.title || 'Project'} Showcase ${idx + 1}`}
+                       className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                       loading="lazy"
+                     />
+                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500 pointer-events-none" />
+                   </div>
+                 ))}
+               </motion.div>
+            </div>
+          )}
 
+          <div className="max-w-4xl mx-auto">
             {/* Tags / Skills */}
             <div className="pt-12 border-t border-white/10">
               <h3 className="font-heading text-xl font-bold text-white mb-6 uppercase tracking-widest">

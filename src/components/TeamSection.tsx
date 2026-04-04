@@ -28,10 +28,10 @@ export default function TeamSection() {
           Đội Ngũ
         </span>
         <h2 className="font-heading text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight whitespace-break-spaces">
-          Những khối óc sáng tạo cùng sự <span className="text-gradient-mono">chuyên nghiệp</span><span className="text-white">.</span>
+          <span className="text-gradient-mono">HUGs Studio</span><span className="text-white">.</span>
         </h2>
         <p className="font-body text-ash text-lg md:text-xl mt-8 max-w-2xl mx-auto">
-          Chúng tôi là tập hợp những nhiếp ảnh gia, nhà thiết kế và chiến lược gia đam mê việc kiến tạo những trải nghiệm số bứt phá giới hạn.
+          HUGs Studio là đơn vị sáng tạo nội dung hình ảnh và video, nơi mỗi dự án không chỉ dừng lại ở việc “đẹp” mà còn phải “chạm”. Chúng tôi tin rằng một sản phẩm tốt không chỉ truyền tải thông điệp, mà còn khơi gợi cảm xúc và tạo ra sự kết nối với người xem.
         </p>
       </motion.div>
 
@@ -45,10 +45,10 @@ export default function TeamSection() {
         data-cursor-hover
       >
         <Image
-          src="/image/banner 1.jpg"
+          src="/image/team/Team15.jpg"
           alt="HUGs STUDIO Team"
           fill
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 filter grayscale contrast-125 brightness-90"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
         {/* Subtle glass overlay on borders */}
         <div className="absolute inset-0 border border-white/10 rounded-3xl pointer-events-none" />

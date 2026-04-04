@@ -120,6 +120,17 @@ export async function createProject(formData: FormData) {
     const imageFile = formData.get('image') as File | null;
     const imageUrl = await uploadFileToR2(imageFile);
 
+    // Parse Gallery
+    let gallery: string[] = [];
+    const galleryString = formData.get('gallery') as string;
+    if (galleryString) {
+      try {
+        gallery = JSON.parse(galleryString);
+      } catch (e) {
+        console.error("Failed to parse gallery JSON", e);
+      }
+    }
+
     const data = {
       slug: generatedSlug,
       title: title,
@@ -130,6 +141,7 @@ export async function createProject(formData: FormData) {
       description: formData.get('description') as string,
       fullDescription: formData.get('fullDescription') as string,
       tags: formData.get('tags') as string,
+      gallery: gallery,
       span: 'md:col-span-6', // Default
       aspect: 'aspect-[4/3]', // Default
       isFavorite: formData.get('isFavorite') === 'on'
@@ -289,7 +301,18 @@ export async function updateProject(documentId: string, formData: FormData) {
       imageUrl = await uploadFileToR2(imageFile);
     }
 
-    const data = {
+    // Parse Gallery
+    let gallery: string[] = [];
+    const galleryString = formData.get('gallery') as string;
+    if (galleryString) {
+      try {
+        gallery = JSON.parse(galleryString);
+      } catch (e) {
+        console.error("Failed to parse gallery JSON", e);
+      }
+    }
+
+    const data: any = {
       slug: generatedSlug,
       title: title,
       category: formData.get('category') as string,
@@ -300,6 +323,10 @@ export async function updateProject(documentId: string, formData: FormData) {
       tags: formData.get('tags') as string,
       isFavorite: formData.get('isFavorite') === 'on'
     };
+    
+    if (formData.has('gallery')) {
+      data.gallery = gallery;
+    }
 
     const { databases, DATABASE_ID } = getAppwrite();
     await databases.updateDocument(DATABASE_ID, 'projects_listing', documentId, data);

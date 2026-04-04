@@ -9,6 +9,7 @@ export interface Project {
   description: string;
   fullDescription: string;
   tags: string[];
+  gallery?: string[];
   span?: string; // For homepage asymmetric grid
   aspect?: string; // For projects listing page
 }
@@ -18,7 +19,7 @@ export const projectsData: Project[] = [
     id: 1,
     slug: "luxe-horizon",
     title: "Luxe Horizon",
-    category: "Nhận Diện Thương Hiệu",
+    category: "ẢNH BRANDING",
     year: "2024",
     color: "from-zinc-800/30 to-zinc-950/60",
     image: "/image/demo1.png",
@@ -32,7 +33,7 @@ export const projectsData: Project[] = [
     id: 2,
     slug: "neon-drift",
     title: "Neon Drift",
-    category: "Thiết Kế Web",
+    category: "ẢNH LIFESTYLE",
     year: "2024",
     color: "from-neutral-800/30 to-neutral-950/60",
     image: "/image/demo2.png",
@@ -46,7 +47,7 @@ export const projectsData: Project[] = [
     id: 3,
     slug: "obsidian-edge",
     title: "Obsidian Edge",
-    category: "Motion Design",
+    category: "QUAY TVC",
     year: "2023",
     color: "from-stone-800/30 to-stone-950/60",
     image: "/image/demo5.png",
@@ -60,7 +61,7 @@ export const projectsData: Project[] = [
     id: 4,
     slug: "solar-flux",
     title: "Solar Flux",
-    category: "Chiến Lược Thương Hiệu",
+    category: "CHỤP ẢNH TÁCH NỀN",
     year: "2023",
     color: "from-gray-800/30 to-gray-950/60",
     image: "/image/demo 3.png",
@@ -74,7 +75,7 @@ export const projectsData: Project[] = [
     id: 5,
     slug: "arctic-pulse",
     title: "Arctic Pulse",
-    category: "UI/UX Design",
+    category: "PROFILE CÁ NHÂN/DOANH NGHIỆP",
     year: "2024",
     color: "from-slate-800/30 to-slate-950/60",
     image: "/image/demo  4 .png",
@@ -88,7 +89,7 @@ export const projectsData: Project[] = [
     id: 6,
     slug: "velvet-storm",
     title: "Velvet Storm",
-    category: "Nhiếp Ảnh",
+    category: "ẢNH F&B",
     year: "2023",
     color: "from-neutral-800/30 to-stone-950/60",
     image: "/image/demo 6.png",
@@ -102,7 +103,7 @@ export const projectsData: Project[] = [
     id: 7,
     slug: "aura-nexus",
     title: "Aura Nexus",
-    category: "App Design",
+    category: "CHỤP ẢNH SỰ KIỆN",
     year: "2024",
     color: "from-slate-800/30 to-slate-950/60",
     image: "/image/demo7.png",

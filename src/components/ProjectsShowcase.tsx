@@ -175,8 +175,11 @@ export default function ProjectsShowcase() {
             Dự Án<br />
             Tiêu Biểu<span className="text-white">.</span>
           </h2>
+          <p className="font-body text-sm md:text-base text-ash/80 mt-6 max-w-xl leading-relaxed">
+            Mỗi dự án tại HUGs là một hành trình sáng tạo nơi ý tưởng được định hình thành concept và chuyển hóa thành những hình ảnh mang dấu ấn riêng biệt.
+          </p>
         </div>
-        <a
+        <Link
           href="/project"
           className="hidden md:flex items-center gap-2 font-body text-sm text-ash hover:text-white transition-colors group"
           data-cursor-hover
@@ -185,7 +188,7 @@ export default function ProjectsShowcase() {
           <svg width="16" height="16" viewBox="0 0 12 12" fill="none" className="transition-transform group-hover:translate-x-1">
             <path d="M1 11L11 1M11 1H3M11 1V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-        </a>
+        </Link>
       </motion.div>
 
       {/* Asymmetric Grid */}
