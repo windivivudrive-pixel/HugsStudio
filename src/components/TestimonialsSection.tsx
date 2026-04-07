@@ -17,7 +17,7 @@ const testimonials = [
     name: "Lâm Quang Thơ",
     role: "Manager F&B | Đà Nẵng",
     content: "“Là người làm F&B lâu năm và quản lý nhiều hệ thống nightlife tại Đà Nẵng, tôi rất tin tưởng giao HUGs Studio chụp các sản phẩm food & drink cho dự án của mình. Hình ảnh đẹp, concept tốt và team làm việc rất chuyên nghiệp.”",
-    avatar: "/image/reviewer2.jpg",
+    avatar: "/image/reviewer22.jpg",
     stars: 5,
   },
   {
@@ -134,13 +134,13 @@ export default function TestimonialsSection() {
   const middleStart = Math.floor(REPEAT_COUNT / 2) * testimonials.length;
 
   const [rawIndex, setRawIndex] = useState(middleStart);
-  
+
   // Reset index to middle if near edges
   useEffect(() => {
     if (rawIndex < 5 || rawIndex > cloned.length - visibleItems - 5) {
       const tm = setTimeout(() => {
         setRawIndex(middleStart + (rawIndex % testimonials.length));
-      }, 700); 
+      }, 700);
       return () => clearTimeout(tm);
     }
   }, [rawIndex, middleStart, cloned.length, visibleItems]);
@@ -182,7 +182,7 @@ export default function TestimonialsSection() {
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging.current || hasSwiped.current) return;
-    
+
     const dx = e.clientX - touchStartX.current;
     const dy = e.clientY - touchStartY.current;
 
@@ -293,9 +293,8 @@ export default function TestimonialsSection() {
             <button
               key={i}
               onClick={() => setRawIndex(middleStart + i)}
-              className={`h-1.5 rounded-full transition-all duration-500 ${
-                i === realIndex ? "w-8 bg-white" : "w-4 bg-white/10 hover:bg-white/20"
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-500 ${i === realIndex ? "w-8 bg-white" : "w-4 bg-white/10 hover:bg-white/20"
+                }`}
               data-cursor-hover
             />
           ))}
