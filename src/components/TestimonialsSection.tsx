@@ -59,17 +59,8 @@ function TestimonialCard({ t, i }: { t: typeof testimonials[0]; i: number }) {
   return (
     <motion.div
       onMouseMove={handleMouseMove}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{
-        opacity: { duration: 0.6, delay: i * 0.1 },
-        y: { duration: 0.6, delay: i * 0.1 },
-        scale: { type: "spring", stiffness: 300, damping: 20 },
-        default: { duration: 0.3 }
-      }}
-      className="relative rounded-[24px] bg-[#141414] p-8 md:p-10 min-h-[380px] h-full flex flex-col justify-between border border-white/10 overflow-hidden group transition-colors duration-300 hover:border-white/20 select-none"
+      whileHover={{ scale: 1.01 }}
+      className="relative rounded-[24px] bg-[#141414] p-8 md:p-10 min-h-[380px] h-full flex flex-col justify-between border border-white/10 overflow-hidden group transition-all duration-500 hover:border-white/30 select-none"
       data-cursor-hover
     >
       {/* Spotlight Effect */}
@@ -124,7 +115,7 @@ function TestimonialCard({ t, i }: { t: typeof testimonials[0]; i: number }) {
 
 export default function TestimonialsSection() {
   const [visibleItems, setVisibleItems] = useState(3);
-  const GAP = 32; // px, matches gap-8
+  const GAP = 32; // px
 
   // Responsive items count
   useEffect(() => {
@@ -138,23 +129,21 @@ export default function TestimonialsSection() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Clone array for seamless loop: [...last N, ...original, ...first N]
-  const cloned = [
-    ...testimonials.slice(-visibleItems),
-    ...testimonials,
-    ...testimonials.slice(0, visibleItems),
-  ];
+  const REPEAT_COUNT = 10;
+  const cloned = Array(REPEAT_COUNT).fill(testimonials).flat();
+  const middleStart = Math.floor(REPEAT_COUNT / 2) * testimonials.length;
 
-  // Start at the real first item (after the prepended clones)
-  const [rawIndex, setRawIndex] = useState(visibleItems);
-  const [animate, setAnimate] = useState(true);
-  const dragging = useRef(false);
-
-  // Calculate pixel offset for a given index
-  const getX = (idx: number, containerWidth: number) => {
-    const itemWidth = (containerWidth - GAP * (visibleItems - 1)) / visibleItems;
-    return -(idx * (itemWidth + GAP));
-  };
+  const [rawIndex, setRawIndex] = useState(middleStart);
+  
+  // Reset index to middle if near edges
+  useEffect(() => {
+    if (rawIndex < 5 || rawIndex > cloned.length - visibleItems - 5) {
+      const tm = setTimeout(() => {
+        setRawIndex(middleStart + (rawIndex % testimonials.length));
+      }, 700); 
+      return () => clearTimeout(tm);
+    }
+  }, [rawIndex, middleStart, cloned.length, visibleItems]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -168,41 +157,49 @@ export default function TestimonialsSection() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // After animation settles at a clone, silently jump to the real item
-  const handleAnimationComplete = () => {
-    const total = testimonials.length;
-    if (rawIndex < visibleItems) {
-      // jumped to prepended clone → jump to real end
-      setAnimate(false);
-      setRawIndex(rawIndex + total);
-    } else if (rawIndex >= visibleItems + total) {
-      // jumped to appended clone → jump to real start
-      setAnimate(false);
-      setRawIndex(rawIndex - total);
-    }
+  const getX = (idx: number, width: number) => {
+    const itemWidth = (width - GAP * (visibleItems - 1)) / visibleItems;
+    return -(idx * (itemWidth + GAP));
   };
-
-  // Re-enable animation after silent jump
-  useEffect(() => {
-    if (!animate) {
-      // Allow one frame for the jump to render, then re-enable
-      const id = requestAnimationFrame(() => setAnimate(true));
-      return () => cancelAnimationFrame(id);
-    }
-  }, [animate]);
 
   const next = () => setRawIndex((p) => p + 1);
   const prev = () => setRawIndex((p) => p - 1);
 
-  // Dot corresponds to original index (not cloned)
-  const realIndex = ((rawIndex - visibleItems) % testimonials.length + testimonials.length) % testimonials.length;
+  const realIndex = rawIndex % testimonials.length;
 
-  // Drag handling
-  const handleDragEnd = (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
-    const swipe = info.offset.x;
-    if (Math.abs(swipe) > 50) {
-      swipe < 0 ? next() : prev();
+  // --- Native touch/mouse swipe detection (no framer-motion drag) ---
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const isDragging = useRef(false);
+  const hasSwiped = useRef(false);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    touchStartX.current = e.clientX;
+    touchStartY.current = e.clientY;
+    isDragging.current = true;
+    hasSwiped.current = false;
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging.current || hasSwiped.current) return;
+    
+    const dx = e.clientX - touchStartX.current;
+    const dy = e.clientY - touchStartY.current;
+
+    // Only trigger if horizontal movement is dominant and exceeds threshold
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      hasSwiped.current = true;
+      isDragging.current = false;
+      if (dx < 0) {
+        next();
+      } else {
+        prev();
+      }
     }
+  };
+
+  const handlePointerUp = () => {
+    isDragging.current = false;
   };
 
   const itemWidth = containerWidth > 0
@@ -264,22 +261,24 @@ export default function TestimonialsSection() {
         </div>
 
         {/* Carousel Container */}
-        <div ref={containerRef} className="relative z-10 overflow-hidden cursor-grab active:cursor-grabbing py-20 -my-20">
+        <div
+          ref={containerRef}
+          className="relative z-10 overflow-hidden cursor-grab active:cursor-grabbing py-20 -my-20 touch-pan-y"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        >
           <motion.div
-            className="flex"
+            className="flex pointer-events-none"
             style={{ gap: GAP }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.08}
-            onDragEnd={handleDragEnd}
             animate={containerWidth > 0 ? { x: getX(rawIndex, containerWidth) } : false}
-            transition={animate ? { type: "spring", stiffness: 300, damping: 30 } : { duration: 0 }}
-            onAnimationComplete={handleAnimationComplete}
+            transition={{ type: "tween", ease: [0.25, 1, 0.5, 1], duration: 0.5 }}
           >
             {cloned.map((t, ci) => (
               <div
                 key={`${t.id}-${ci}`}
-                className="shrink-0"
+                className="shrink-0 pointer-events-auto"
                 style={{ width: itemWidth > 0 ? itemWidth : `calc((100% - ${(visibleItems - 1) * GAP}px) / ${visibleItems})` }}
               >
                 <TestimonialCard t={t} i={ci} />
@@ -293,9 +292,10 @@ export default function TestimonialsSection() {
           {testimonials.map((_, i) => (
             <button
               key={i}
-              onClick={() => setRawIndex(i + visibleItems)}
-              className={`h-1.5 rounded-full transition-all duration-500 ${i === realIndex ? "w-8 bg-white" : "w-4 bg-white/10 hover:bg-white/20"
-                }`}
+              onClick={() => setRawIndex(middleStart + i)}
+              className={`h-1.5 rounded-full transition-all duration-500 ${
+                i === realIndex ? "w-8 bg-white" : "w-4 bg-white/10 hover:bg-white/20"
+              }`}
               data-cursor-hover
             />
           ))}

@@ -23,10 +23,11 @@ export default function Chatbot() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => {
-    if (typeof window !== 'undefined' && window.crypto) {
+    if (typeof window !== 'undefined' && typeof window.crypto !== 'undefined' && typeof window.crypto.randomUUID === 'function') {
       return window.crypto.randomUUID();
     }
-    return `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const randomSuffix = Math.random().toString(36).slice(2);
+    return `session_${Date.now()}_${randomSuffix}`;
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
