@@ -18,9 +18,7 @@ import React, { useRef, useEffect, useState } from "react";
  * - Premium cards with spotlight border effect
  * - Layout matching the user provided reference
  * - 5 articles total, 3 visible on desktop
- */
-
-import { Article } from "@/data/news";
+ */import { Article, articlesData } from "@/data/news";
 import { databases, APPWRITE_CONFIG } from "@/lib/appwrite";
 import { Query } from "appwrite";
 
@@ -48,7 +46,7 @@ function ArticleCard({ article }: { article: Article }) {
           <div className="relative overflow-hidden rounded-3xl bg-white/10 p-[2px] aspect-[4/3]">
             {/* Spotlight Border Glow */}
             <motion.div
-              className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
+              className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
               style={{
                 background: useMotionTemplate`
                   radial-gradient(
@@ -98,7 +96,7 @@ function ArticleCard({ article }: { article: Article }) {
 }
 
 export default function NewsJournal() {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<Article[]>(articlesData.slice(0, 5));
   const [isPaused, setIsPaused] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);

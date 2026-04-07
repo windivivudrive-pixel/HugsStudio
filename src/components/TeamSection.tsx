@@ -41,11 +41,11 @@ export default function TeamSection() {
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden group z-10"
+        className="relative w-full max-w-5xl mx-auto aspect-[3/2] rounded-3xl overflow-hidden group z-10"
         data-cursor-hover
       >
         <Image
-          src="/image/team/Team15.jpg"
+          src="/image/team/Team26.jpg"
           alt="HUGs STUDIO Team"
           fill
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"

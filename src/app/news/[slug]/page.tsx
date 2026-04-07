@@ -84,7 +84,7 @@ export default async function ArticlePage({ params }: Props) {
           </header>
 
           {/* Hero Image */}
-          <div className="relative w-full aspect-[21/9] md:aspect-[3/1] max-w-6xl mx-auto rounded-3xl overflow-hidden mb-20 bg-white/5 border border-white/10">
+          <div className="relative w-full aspect-[16/9] max-w-6xl mx-auto rounded-2xl overflow-hidden mb-12 md:mb-20 bg-white/5 border border-white/10">
             <Image
               src={article.image}
               alt={article.title}

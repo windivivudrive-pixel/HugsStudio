@@ -5,14 +5,15 @@ import Image from "next/image";
 import Footer from "@/components/Footer";
 import AnimatedCounter from "@/components/AnimatedCounter";
 
-// Placeholder images for the gallery
-const topGridImages = [
-  "/image/team/Team4.jpg",
-  "/image/team/Team3.jpg",
-  "/image/team/Team5.jpg",
-  "/image/team/Team7.jpg",
-  "/image/team/Team6.jpg",
-  "/image/team/Team8.jpg",
+// Team members for the top gallery
+const teamMembers = [
+  { src: "/image/team/Team4.jpg", name: "CẨM LY", role: "Content" },
+  { src: "/image/team/Team5.jpg", name: "THẢO ĐAN", role: "Stylist" },
+  { src: "/image/team/Team8.jpg", name: "PHƯƠNG THẢO", role: "Content" },
+  { src: "/image/team/Team3.jpg", name: "DUY LONG", role: "Editor" },
+  { src: "/image/team/Team9.jpg", name: "NGUYỄN NHẠC", role: "Photographer" },
+  { src: "/image/team/Team7.jpg", name: "THU DIỆN", role: "Videographer" },
+  { src: "/image/team/Team6.jpg", name: "ĐỖ KIÊN", role: "Manager" },
 ];
 
 const middleImages = [
@@ -22,7 +23,7 @@ const middleImages = [
   "/image/team/Team.jpg",
 ];
 
-const bottomImage = "/image/team/Team26.jpg";
+const bottomImage = "/image/team/Team15.jpg";
 
 function GalleryImage({
   src,
@@ -170,11 +171,30 @@ export default function AboutPage() {
             Với đội ngũ trẻ, giàu ý tưởng và không ngừng đổi mới, HUGs luôn tìm kiếm những cách thể hiện khác biệt từ concept, góc quay đến cách kể chuyện. Mỗi khung hình đều được chăm chút để không chỉ ghi lại khoảnh khắc, mà còn kể một câu chuyện mang dấu ấn riêng của thương hiệu.
           </p>
 
-          {/* Top Fixed Grid 3x2 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-            {topGridImages.map((src, index) => (
-              <GalleryImage key={`top-${index}`} src={src} alt={`HUGs Team ${index + 4}`} />
-            ))}
+          {/* Team Members Grid (4 top, 3 bottom) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-12 md:gap-x-8 md:gap-y-16 mb-20">
+            {teamMembers.map((member, index) => {
+              const isTopRow = index < 4;
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  key={`member-${index}`}
+                  className={`flex flex-col items-center ${isTopRow ? "lg:col-span-3" : "lg:col-span-4"}`}
+                >
+                  <GalleryImage
+                    src={member.src}
+                    alt={member.name}
+                    className="w-full mb-5"
+                    aspect="aspect-[2/3]"
+                  />
+                  <h3 className="font-heading text-lg md:text-xl font-bold text-white mb-1.5">{member.name}</h3>
+                  <p className="font-body text-ash text-xs uppercase tracking-widest">{member.role}</p>
+                </motion.div>
+              );
+            })}
           </div>
 
           {/* Middle Custom Grid (4 images total) */}

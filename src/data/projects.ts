@@ -12,6 +12,8 @@ export interface Project {
   gallery?: string[];
   span?: string; // For homepage asymmetric grid
   aspect?: string; // For projects listing page
+  type?: 'image' | 'video';
+  video?: string;
 }
 
 export const projectsData: Project[] = [
@@ -26,8 +28,9 @@ export const projectsData: Project[] = [
     description: "Nâng tầm đẳng cấp cho thương hiệu thời trang cao cấp.",
     fullDescription: "Luxe Horizon là một trong những dự án mang tính đột phá của chúng tôi trong lĩnh vực thời trang. Chúng tôi đã xây dựng hệ thống nhận diện thương hiệu từ con số không, tập trung vào sự tối giản nhưng vẫn toát lên vẻ sang trọng. Dự án bao gồm thiết kế logo, bộ nhận diện văn phòng, bao bì và chiến dịch ra mắt kỹ thuật số.",
     tags: ["Brand Strategy", "Visual Identity", "Fashion", "Luxury"],
-    span: "col-span-1 md:col-span-7",
+    span: "col-span-7",
     aspect: "aspect-[16/10]",
+    type: "image"
   },
   {
     id: 2,
@@ -40,8 +43,25 @@ export const projectsData: Project[] = [
     description: "Trải nghiệm số đầy năng lượng cho thế hệ tương lai.",
     fullDescription: "Neon Drift là một nền tảng thương mại điện tử dành cho giới trẻ yêu thích phong cách cyberpunk. Chúng tôi đã sử dụng những công nghệ web tiên tiến nhất để tạo ra các hiệu ứng chuyển động mượt mà, màu sắc neon rực rỡ và trải nghiệm người dùng độc đáo. Website không chỉ là nơi mua sắm mà còn là một không gian nghệ thuật số.",
     tags: ["Web Design", "UI/UX", "E-commerce", "Cyberpunk"],
-    span: "col-span-1 md:col-span-5",
+    span: "col-span-5",
     aspect: "aspect-[4/5]",
+    type: "image"
+  },
+  {
+    id: 8,
+    slug: "vertical-vision",
+    title: "Vertical Vision",
+    category: "SHORT VIDEO",
+    year: "2024",
+    color: "from-purple-800/30 to-purple-950/60",
+    image: "/image/demo  4 .png",
+    description: "Góc nhìn dọc mới lạ thu hút sự chú ý tức thì.",
+    fullDescription: "Vertical Vision là chuỗi video ngắn tối ưu hóa cho màn hình dọc, nâng cao tỉ lệ giữ chân người xem và tương tác vượt trội. Phù hợp hoàn hảo cho các nền tảng mạng xã hội hiện đại.",
+    tags: ["Short Video", "Social Media", "Vertical", "Creative"],
+    span: "col-span-4 row-span-2",
+    aspect: "aspect-[9/16]",
+    type: "video",
+    video: "/video/video showcase.mp4"
   },
   {
     id: 3,
@@ -54,8 +74,9 @@ export const projectsData: Project[] = [
     description: "Sức mạnh chuyển động trong từng khung hình.",
     fullDescription: "Obsidian Edge là dự án motion design thực hiện cho một thương hiệu xe điện cao cấp. Chúng tôi đã kết hợp giữa kỹ xảo 3D và đồ họa 2D để tạo ra những thước phim quảng cáo ấn tượng, tôn vinh những đường nét thiết kế tinh xảo của sản phẩm. Sự mượt mà và nhịp điệu chính là chìa khóa của dự án này.",
     tags: ["Motion graphics", "3D Animation", "Automotive", "VFX"],
-    span: "col-span-1 md:col-span-5",
+    span: "col-span-4",
     aspect: "aspect-square",
+    type: "image"
   },
   {
     id: 4,
@@ -68,8 +89,9 @@ export const projectsData: Project[] = [
     description: "Định hướng tương lai cho năng lượng xanh.",
     fullDescription: "Với Solar Flux, chúng tôi không chỉ thiết kế hình ảnh mà còn xây dựng một câu chuyện thương hiệu ý nghĩa. Mục tiêu là làm cho khái niệm năng lượng mặt trời trở nên gần gũi và hấp dẫn hơn với các hộ gia đình. Chiến lược đã giúp thương hiệu tiếp cận được hàng ngàn khách hàng mới ngay trong tháng đầu tiên.",
     tags: ["Brand Strategy", "Content Strategy", "Green Tech", "Marketing"],
-    span: "col-span-1 md:col-span-7",
+    span: "col-span-4",
     aspect: "aspect-[16/9]",
+    type: "image"
   },
   {
     id: 5,
@@ -82,8 +104,9 @@ export const projectsData: Project[] = [
     description: "Giao diện tinh khiết như băng giá phương Bắc.",
     fullDescription: "Arctic Pulse là ứng dụng theo dõi sức khỏe và giấc ngủ với triết lý thiết kế tối giản. Chúng tôi tập trung vào việc giảm thiểu sự xao nhãng cho người dùng, sử dụng các khoảng trắng thông minh và độ tương phản nhẹ nhàng. Ứng dụng đã nhận được nhiều giải thưởng về thiết kế trải nghiệm người dùng.",
     tags: ["App Design", "Mobile App", "Health", "Minimalism"],
-    span: "col-span-1 md:col-span-8",
+    span: "col-span-8",
     aspect: "aspect-[4/3]",
+    type: "image"
   },
   {
     id: 6,
@@ -96,8 +119,9 @@ export const projectsData: Project[] = [
     description: "Ghi lại những khoảnh khắc đầy cảm xúc.",
     fullDescription: "Dự án nhiếp ảnh Velvet Storm là sự kết hợp giữa thời trang và thiên nhiên. Chúng tôi đã thực hiện các bộ ảnh tại những địa điểm khắc nghiệt nhưng đầy cảm hứng, sử dụng ánh sáng tự nhiên để tôn vinh vẻ đẹp của con người và trang phục. Bộ ảnh đã được đăng tải trên nhiều tạp chí thời trang quốc tế.",
     tags: ["Photography", "Art Direction", "Fashion", "Editorial"],
-    span: "col-span-1 md:col-span-4",
+    span: "col-span-6",
     aspect: "aspect-[16/10]",
+    type: "image"
   },
   {
     id: 7,
@@ -110,7 +134,8 @@ export const projectsData: Project[] = [
     description: "Kết nối tâm hồn qua không gian kỹ thuật số.",
     fullDescription: "Aura Nexus là một mạng xã hội thế hệ mới tập trung vào sự riêng tư và gắn kết chân thực. Thiết kế của chúng tôi nhấn mạnh vào các vòng kết nối nhỏ, sử dụng các hiệu ứng ánh sáng (aura) để biểu thị tâm trạng và sự hiện diện của người dùng. Một cách tiếp cận hoàn toàn mới cho kỷ nguyên số.",
     tags: ["UI/UX", "Social Media", "Privacy", "Digital Art"],
-    span: "col-span-1 md:col-span-12",
+    span: "col-span-6",
     aspect: "aspect-[21/9]",
+    type: "image"
   },
 ];

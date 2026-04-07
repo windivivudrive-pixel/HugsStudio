@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { motion } from "framer-motion";
 import { projectsData, Project } from "@/data/projects";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { databases, APPWRITE_CONFIG } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import Footer from "@/components/Footer";
@@ -22,6 +22,7 @@ export default function ProjectDetailPage({ params }: Props) {
   
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchProject() {
@@ -165,13 +166,13 @@ export default function ProjectDetailPage({ params }: Props) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="relative w-full aspect-[21/9] md:aspect-[3/1] max-w-6xl mx-auto rounded-3xl overflow-hidden mb-20 bg-white/5 border border-white/10"
+            className="relative w-full aspect-[16/9] max-w-6xl mx-auto rounded-2xl overflow-hidden mb-20 bg-white/5 border border-white/10"
           >
             <Image
               src={project.image || "/image/placeholder.png"}
               alt={project.title}
               fill
-              className="object-cover"
+              className="object-contain"
               priority
             />
           </motion.div>
@@ -197,20 +198,91 @@ export default function ProjectDetailPage({ params }: Props) {
                  whileInView={{ opacity: 1, y: 0 }}
                  viewport={{ once: true }}
                  transition={{ duration: 0.6 }}
-                 className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6"
+                 className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8"
                >
                  {allImageUrls.map((url, idx) => (
-                   <div key={idx} className="break-inside-avoid relative rounded-3xl overflow-hidden group border border-white/10 bg-white/5 shadow-2xl">
+                   <div
+                     key={idx}
+                     className="break-inside-avoid relative rounded-2xl overflow-hidden group border border-white/10 bg-white/5 shadow-2xl cursor-pointer"
+                     onClick={() => setLightboxIndex(idx)}
+                     data-cursor-hover
+                   >
                      <img
                        src={url}
                        alt={`${project.title || 'Project'} Showcase ${idx + 1}`}
                        className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                        loading="lazy"
                      />
-                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500 pointer-events-none" />
+                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500 pointer-events-none flex items-center justify-center">
+                       <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-80 transition-opacity duration-300 drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                       </svg>
+                     </div>
                    </div>
                  ))}
                </motion.div>
+            </div>
+          )}
+
+          {/* Lightbox Modal */}
+          {lightboxIndex !== null && (
+            <div
+              className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-8"
+              onClick={() => setLightboxIndex(null)}
+            >
+              {/* Close Button */}
+              <button
+                className="absolute top-6 right-6 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors duration-200"
+                onClick={() => setLightboxIndex(null)}
+                aria-label="Đóng"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Prev Button */}
+              {lightboxIndex > 0 && (
+                <button
+                  className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors duration-200"
+                  onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex - 1); }}
+                  aria-label="Ảnh trước"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Next Button */}
+              {lightboxIndex < allImageUrls.length - 1 && (
+                <button
+                  className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors duration-200"
+                  onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex + 1); }}
+                  aria-label="Ảnh tiếp"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Image */}
+              <motion.img
+                key={lightboxIndex}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                src={allImageUrls[lightboxIndex]}
+                alt={`${project.title || 'Project'} Showcase ${lightboxIndex + 1}`}
+                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              />
+
+              {/* Counter */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 font-body text-sm text-white/60">
+                {lightboxIndex + 1} / {allImageUrls.length}
+              </div>
             </div>
           )}
 

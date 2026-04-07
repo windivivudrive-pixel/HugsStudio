@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -34,17 +34,41 @@ const cardVariants = {
 };
 
 function NewsCard({ article, span, featured = false }: { article: Article; span: string; featured?: boolean }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+
   return (
     <Link href={`/news/${article.slug}`} className={`${span}`}>
       <motion.div
         variants={cardVariants}
+        onMouseMove={handleMouseMove}
         className="group relative z-10 flex flex-col h-full transition-transform duration-300 hover:scale-[1.02]"
         data-cursor-hover
       >
+        {/* Spotlight Border Glow */}
+        <motion.div
+          className="pointer-events-none absolute -inset-px rounded-lg opacity-0 transition duration-300 group-hover:opacity-100 z-0"
+          style={{
+            background: useMotionTemplate`
+              radial-gradient(
+                350px circle at ${mouseX}px ${mouseY}px,
+                rgba(255,255,255,0.3),
+                transparent 40%
+              )
+            `,
+          }}
+        />
+
         {/* Card Border wrapper */}
-        <div className={`relative overflow-hidden rounded-2xl md:rounded-3xl bg-transparent md:bg-white/10 p-0 md:p-[2px] w-full ${featured ? 'aspect-[16/9] md:aspect-[21/9]' : 'aspect-square sm:aspect-[4/3] md:aspect-auto md:flex-1'}`}>
+        <div className={`relative overflow-hidden rounded-lg bg-transparent md:bg-white/10 p-[1px] md:p-[1px] w-full ${featured ? 'aspect-[16/9]' : 'aspect-[4/3] md:flex-1'}`}>
           {/* Inner Image Container */}
-          <div className={`relative h-full w-full rounded-2xl md:rounded-[22px] bg-obsidian overflow-hidden z-10 ${featured ? 'md:min-h-[450px]' : 'md:min-h-[350px]'}`}>
+          <div className="relative h-full w-full rounded-[7px] bg-obsidian overflow-hidden z-10">
             <Image
               src={article.image}
               alt={article.title}
@@ -150,7 +174,167 @@ export default function NewsPage() {
   }
 
   // Specific spanning for the Magazine Layout
-  const getSpan = (index: number) => {
+function HeroArticleGlow({ article }: { article: Article }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+  return (
+    <Link href={`/news/${article.slug}`} className="group block" onMouseMove={handleMouseMove} data-cursor-hover>
+      <div className="relative aspect-[16/10] rounded-lg md:rounded-xl overflow-hidden bg-white/5 p-[1px]">
+        <motion.div
+          className="pointer-events-none absolute -inset-px rounded-lg md:rounded-xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
+          style={{
+            background: useMotionTemplate`
+              radial-gradient(
+                600px circle at ${mouseX}px ${mouseY}px,
+                rgba(255,255,255,0.3),
+                transparent 40%
+              )
+            `,
+          }}
+        />
+        <div className="relative h-full w-full rounded-[7px] md:rounded-[10px] overflow-hidden z-10 bg-obsidian">
+          <Image
+            src={article.image}
+            alt={article.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute top-4 left-4">
+            <span className="px-3 py-1 rounded-full border border-white/20 bg-black/40 backdrop-blur-md font-heading font-medium text-white text-xs">
+              {article.category}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 md:mt-5">
+        <h3 className="font-heading text-xl md:text-2xl lg:text-3xl font-bold leading-snug text-white group-hover:text-white/80 transition-colors duration-300 line-clamp-3">
+          {article.title}
+        </h3>
+        <div className="flex items-center gap-2 mt-3">
+          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-white/40 to-white/90 shrink-0" />
+          <span className="text-xs font-body text-white/50">Admin</span>
+          <span className="text-white/20 text-xs">·</span>
+          <span className="text-xs font-body text-white/40">{article.date}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function SecondaryArticleGlow({ article }: { article: Article }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+  return (
+    <Link href={`/news/${article.slug}`} className="group block" onMouseMove={handleMouseMove} data-cursor-hover>
+      <div className="relative aspect-[4/3] rounded-lg md:rounded-xl overflow-hidden bg-white/5 p-[1px]">
+        <motion.div
+          className="pointer-events-none absolute -inset-px rounded-lg md:rounded-xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
+          style={{
+            background: useMotionTemplate`
+              radial-gradient(
+                400px circle at ${mouseX}px ${mouseY}px,
+                rgba(255,255,255,0.3),
+                transparent 40%
+              )
+            `,
+          }}
+        />
+        <div className="relative h-full w-full rounded-[7px] md:rounded-[10px] overflow-hidden z-10 bg-obsidian">
+          <Image
+            src={article.image}
+            alt={article.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute top-4 left-4">
+            <span className="px-3 py-1 rounded-full border border-white/20 bg-black/40 backdrop-blur-md font-heading font-medium text-white text-xs">
+              {article.category}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 md:mt-5">
+        <h3 className="font-heading text-lg md:text-xl font-bold leading-snug text-white group-hover:text-white/80 transition-colors duration-300 line-clamp-2">
+          {article.title}
+        </h3>
+        {article.content && (
+          <p className="mt-2 text-ash font-body text-sm line-clamp-3 leading-relaxed">
+            {article.content.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').substring(0, 160)}...
+          </p>
+        )}
+        <div className="flex items-center gap-2 mt-3">
+          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-white/40 to-white/90 shrink-0" />
+          <span className="text-xs font-body text-white/50">Admin</span>
+          <span className="text-white/20 text-xs">·</span>
+          <span className="text-xs font-body text-white/40">{article.date}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function GridArticleGlow({ article }: { article: Article }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+  return (
+    <Link href={`/news/${article.slug}`} className="group block" onMouseMove={handleMouseMove} data-cursor-hover>
+      <div className="relative aspect-[4/3] rounded-lg md:rounded-xl overflow-hidden bg-white/5 p-[1px]">
+        <motion.div
+          className="pointer-events-none absolute -inset-px rounded-lg md:rounded-xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
+          style={{
+            background: useMotionTemplate`
+              radial-gradient(
+                300px circle at ${mouseX}px ${mouseY}px,
+                rgba(255,255,255,0.3),
+                transparent 40%
+              )
+            `,
+          }}
+        />
+        <div className="relative h-full w-full rounded-[7px] md:rounded-[10px] overflow-hidden z-10 bg-obsidian">
+          <Image
+            src={article.image}
+            alt={article.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        </div>
+      </div>
+      <div className="mt-4">
+        <h3 className="font-heading text-base md:text-lg font-bold leading-snug text-white group-hover:text-white/80 transition-colors duration-300 line-clamp-2">
+          {article.title}
+        </h3>
+        <div className="flex items-center gap-2 mt-2">
+          <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-white/40 to-white/90 shrink-0" />
+          <span className="text-[11px] font-body text-white/50">Admin</span>
+          <span className="text-white/20 text-[11px]">·</span>
+          <span className="text-[11px] font-body text-white/40">{article.date}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+const getSpan = (index: number) => {
     // Mobile: Hero spans 2 cols, others span 1. Desktop: Hero spans 2 cols, others span 1.
     if (index === 0) return "col-span-2 md:col-span-2";
     return "col-span-1 md:col-span-1";
@@ -183,16 +367,36 @@ export default function NewsPage() {
 
             {/* Left Main Content (8 Columns) */}
             <div className="lg:col-span-8">
-              {/* Top Grid Area (First 5 Articles) - Responsive */}
+              {/* Featured 5 Articles — Magazine Layout */}
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-2 md:grid-cols-3 gap-y-8 gap-x-4 md:gap-y-12 md:gap-x-6"
+                className="space-y-6 md:space-y-8"
               >
-                {mainArticles.map((article, index) => (
-                  <NewsCard key={article.id} article={article} span={getSpan(index)} featured={index === 0} />
-                ))}
+                {/* Row 1: Hero (left) + Secondary (right) */}
+                {mainArticles.length >= 2 && (
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
+                    {/* Left — Large Hero */}
+                    <motion.div variants={cardVariants} className="md:col-span-7">
+                      <HeroArticleGlow article={mainArticles[0]} />
+                    </motion.div>
+
+                    {/* Right — Secondary article */}
+                    <motion.div variants={cardVariants} className="md:col-span-5">
+                      <SecondaryArticleGlow article={mainArticles[1]} />
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* Row 2: 3 equal columns */}
+                {mainArticles.length > 2 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+                    {mainArticles.slice(2, 5).map((article) => (
+                      <GridArticleGlow key={article.id} article={article} />
+                    ))}
+                  </div>
+                )}
               </motion.div>
 
               {/* Sub-divider */}
