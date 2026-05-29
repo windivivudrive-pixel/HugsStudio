@@ -408,7 +408,7 @@ export default function AdminPage() {
 
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen bg-[#0c0c0c] flex items-center justify-center">
+      <div className="admin-page min-h-screen bg-[#0c0c0c] flex items-center justify-center">
         <div className="text-white/50 flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin" />
           <p>Đang kiểm tra quyền truy cập...</p>
@@ -419,7 +419,7 @@ export default function AdminPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#0c0c0c] text-white p-6 md:p-12 font-body flex items-center justify-center">
+      <div className="admin-page min-h-screen bg-[#0c0c0c] text-white p-6 md:p-12 font-body flex items-center justify-center">
         <div className="max-w-md w-full bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-md">
           <div className="text-center mb-8">
             <h1 className="font-heading text-3xl font-bold text-white mb-2">Đăng Nhập Quản Trị</h1>
@@ -471,8 +471,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-white pt-32 pb-24 px-6 relative z-10">
-      <div className="max-w-4xl mx-auto">
+    <div className="admin-page min-h-screen bg-[#0c0c0c] text-white pt-32 pb-24 px-4 md:px-8 relative z-10">
+      <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-12">
           <div>
             <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4">HUGs Admin</h1>

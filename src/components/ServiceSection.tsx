@@ -16,30 +16,30 @@ const services: Service[] = [
   {
     id: "01",
     title: "CHỤP SẢN PHẨM",
-    description: "Tôn vinh giá trị sản phẩm qua những góc máy tinh tế và ánh sáng chuyên nghiệp. Chúng tôi tạo ra hình ảnh chất lượng cao, kích thích thị giác và tối ưu hiệu quả bán hàng.",
+    description: "Dịch vụ studio chụp sản phẩm chuyên nghiệp tại Đà Nẵng. Tôn vinh giá trị sản phẩm qua những góc máy tinh tế và ánh sáng chuyên nghiệp, tạo ra hình ảnh chất lượng cao để tối ưu hiệu quả bán hàng.",
     tags: ["Thương mại", "Light Painting", "High-end Retouch"],
-    images: ["/image/demo5.png", "/image/demo1.png", "/image/demo2.png"],
+    images: ["/image/du-an-home/2.webp", "/image/demo1.png", "/image/du-an-home/07.webp"],
   },
   {
     id: "02",
     title: "CHỤP PROFILE",
     description: "Xây dựng hình ảnh cá nhân và đội ngũ chuyên nghiệp, mang đậm dấu ấn riêng. Mỗi khung hình đều toát lên thần thái, giá trị cốt lõi và phong cách độc bản của doanh nghiệp.",
     tags: ["Corporate", "Personal Branding", "Studio/Location"],
-    images: ["/image/demo7.png", "/image/demo  4 .png", "/image/demo 3.png"],
+    images: ["/image/team/profile 1.jpeg", "/image/team/profile 2.jpg", "/image/team/profile 3.jpeg"],
   },
   {
     id: "03",
     title: "QUAY SẢN PHẨM",
     description: "Truyền tải linh hồn sản phẩm qua những thước phim chuyển động mượt mà. Kết hợp kỹ thuật quay hiện đại và dàn dựng sáng tạo để sản phẩm trở nên sống động hơn bao giờ hết.",
     tags: ["Stop Motion", "Macro", "Product Cinematography"],
-    images: ["/image/demo6.png", "/image/demo5.png", "/image/demo7.png"],
+    images: ["/image/team/Team2.jpg", "/image/team/Team16.jpg", "/image/team/Team13.jpg"],
   },
   {
     id: "04",
     title: "QUAY TVC",
     description: "Giải pháp sản xuất video quảng cáo toàn diện, từ ý tưởng đến thực thi. Chúng tôi kể câu chuyện thương hiệu bằng ngôn ngữ điện ảnh, tạo ấn tượng mạnh mẽ và ghi dấu ấn sâu đậm.",
     tags: ["Storytelling", "Commercial", "Production"],
-    images: ["/image/demo1.png", "/image/demo2.png", "/image/demo 3.png"],
+    images: ["/image/team/bts1.jpg", "/image/team/bts2.jpg", "/image/team/bts3.jpg"],
   },
 ];
 
@@ -91,7 +91,7 @@ function ServiceItem({
   }
 
   return (
-    <div 
+    <div
       className="group relative overflow-hidden rounded-2xl bg-white/5 p-[2px] cursor-pointer"
       onClick={onToggle}
       onMouseMove={handleMouseMove}
@@ -132,9 +132,9 @@ function ServiceItem({
                 className="relative w-full h-full flex items-center justify-center text-white"
               >
                 <div className="absolute w-3 md:w-6 h-[2px] bg-current rounded-full" />
-                <motion.div 
-                   animate={{ opacity: isExpanded ? 0 : 1 }}
-                   className="absolute w-[2px] h-3 md:h-6 bg-current rounded-full" 
+                <motion.div
+                  animate={{ opacity: isExpanded ? 0 : 1 }}
+                  className="absolute w-[2px] h-3 md:h-6 bg-current rounded-full"
                 />
               </motion.div>
             </div>
@@ -157,7 +157,7 @@ function ServiceItem({
                     </p>
                     <div className="flex flex-wrap gap-2 md:gap-3">
                       {service.tags.map(tag => (
-                        <span 
+                        <span
                           key={tag}
                           className="px-4 md:px-6 py-2 md:py-2.5 rounded-full border border-white/15 font-heading text-[10px] md:text-sm font-medium text-white/80 transition-colors hover:border-white/30 hover:bg-white/5"
                         >
@@ -168,8 +168,8 @@ function ServiceItem({
                   </div>
 
                   {/* Image Slider */}
-                  <div 
-                    className="relative flex-shrink-0 w-full md:w-[40%] aspect-video rounded-2xl overflow-hidden glass-border group/slider"
+                  <div
+                    className="relative flex-shrink-0 w-full md:w-[40%] aspect-[3/2] rounded-2xl overflow-hidden glass-border group/slider"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <ServiceSlider images={service.images} />
@@ -212,7 +212,7 @@ function ServiceSlider({ images }: { images: string[] }) {
           transition={{ duration: 1, ease: "easeInOut" }}
           className="absolute inset-0 cursor-grab active:cursor-grabbing z-10"
         >
-          <Image 
+          <Image
             src={images[index]}
             alt="Service Detail"
             fill
@@ -224,20 +224,20 @@ function ServiceSlider({ images }: { images: string[] }) {
 
       {/* Navigation Controls */}
       <div className="absolute bottom-4 right-4 flex gap-2 z-20 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300">
-        <button 
+        <button
           onClick={prev}
           className="w-8 h-8 rounded-full border border-white/20 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all"
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M7.5 9L4.5 6L7.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M7.5 9L4.5 6L7.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <button 
+        <button
           onClick={next}
           className="w-8 h-8 rounded-full border border-white/20 bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-all"
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </div>
@@ -245,7 +245,7 @@ function ServiceSlider({ images }: { images: string[] }) {
       {/* Progress Indicators */}
       <div className="absolute bottom-4 left-4 flex gap-1.5 z-20">
         {images.map((_, i) => (
-          <div 
+          <div
             key={i}
             className={`h-1 rounded-full transition-all duration-300 ${i === index ? 'w-6 bg-white' : 'w-2 bg-white/30'}`}
           />

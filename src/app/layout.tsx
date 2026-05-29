@@ -25,9 +25,9 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://hugs-studio.vercel.app'),
-  title: "HUGs STUDIO — Sáng Tạo Nội Dung Hình Ảnh & Video",
+  title: "HUGs STUDIO — Studio Chụp Sản Phẩm & Quay TVC Tại Đà Nẵng",
   description:
-    "HUGS STUDIO là đơn vị chuyên nghiệp về sản xuất nội dung hình ảnh, video, chụp ảnh sản phẩm, profile và quay phim TVC. Chúng tôi kiến tạo những giá trị thẩm mỹ và cảm xúc chân thực cho thương hiệu của bạn.",
+    "HUGS STUDIO là đơn vị hàng đầu về sản xuất nội dung hình ảnh, video, studio chụp sản phẩm chuyên nghiệp và quay TVC tại Đà Nẵng. Chúng tôi kiến tạo những giá trị thẩm mỹ và cảm xúc chân thực cho thương hiệu của bạn.",
   keywords: [
     "creative agency",
     "chụp ảnh sản phẩm",
@@ -36,11 +36,15 @@ export const metadata: Metadata = {
     "quay phim chuyên nghiệp",
     "HUGS STUDIO",
     "chụp ảnh profile",
+    "studio chụp sản phẩm",
+    "studio tại đà nẵng",
+    "chụp ảnh sản phẩm đà nẵng",
+    "quay tvc đà nẵng"
   ],
   openGraph: {
-    title: "HUGs STUDIO — Sáng Tạo Nội Dung Hình Ảnh & Video",
+    title: "HUGs STUDIO — Studio Chụp Sản Phẩm & Quay TVC Tại Đà Nẵng",
     description:
-      "Đơn vị sản xuất nội dung hình ảnh và video hàng đầu, mang đến sự đột phá cho thương hiệu.",
+      "Đơn vị sản xuất nội dung hình ảnh, studio chụp sản phẩm và quay TVC hàng đầu tại Đà Nẵng, mang đến sự đột phá cho thương hiệu.",
     type: "website",
     images: [
       {
@@ -53,9 +57,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "HUGs STUDIO — Sáng Tạo Nội Dung Hình Ảnh & Video",
+    title: "HUGs STUDIO — Studio Chụp Sản Phẩm & Quay TVC Tại Đà Nẵng",
     description:
-      "Đơn vị sản xuất nội dung hình ảnh và video hàng đầu, mang đến sự đột phá cho thương hiệu.",
+      "Đơn vị sản xuất nội dung hình ảnh, studio chụp sản phẩm và quay TVC hàng đầu tại Đà Nẵng, mang đến sự đột phá cho thương hiệu.",
     images: ["/image/banner.png"],
   },
   icons: {
@@ -74,6 +78,26 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-obsidian text-white`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "LocalBusiness",
+              name: "HUGs STUDIO",
+              image: "https://hugs-studio.vercel.app/image/banner.png",
+              description: "HUGS STUDIO là đơn vị hàng đầu về sản xuất nội dung hình ảnh, video, studio chụp sản phẩm chuyên nghiệp và quay TVC tại Đà Nẵng.",
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Đà Nẵng",
+                addressCountry: "VN"
+              },
+              url: "https://hugs-studio.vercel.app",
+              telephone: "",
+              priceRange: "$$"
+            })
+          }}
+        />
         <Navbar />
         {children}
         <CustomCursor />

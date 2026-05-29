@@ -150,6 +150,16 @@ function ProjectCard({ project, variants, className = "" }: { project: any; vari
   );
 }
 
+const LOCAL_CONFIGS: Record<string, { image: string; span: string; aspect: string; type: 'image' | 'video' }> = {
+  '69ce33b3003b8472378c': { image: '/image/du-an-home/1.webp', span: 'col-span-7', aspect: 'aspect-[16/10]', type: 'image' },
+  '69cf2a5c0015e782cd1c': { image: '/image/du-an-home/2.webp', span: 'col-span-5', aspect: 'aspect-[4/5]', type: 'image' },
+  '69cf29b60029fcf9fbe0': { image: '/image/du-an-home/3.webp', span: 'col-span-4', aspect: 'aspect-square', type: 'image' },
+  '6a191f0000317b1bfb25': { image: '/image/du-an-home/04.webp', span: 'col-span-4', aspect: 'aspect-[16/9]', type: 'image' },
+  '69ce3a20001c830d1bd1': { image: '/image/du-an-home/5.webp', span: 'col-span-8', aspect: 'aspect-[4/3]', type: 'image' },
+  '69cf295a00172e76fc61': { image: '/image/du-an-home/6.png', span: 'col-span-6', aspect: 'aspect-[16/10]', type: 'image' },
+  '6a192001002d3af039d3': { image: '/image/du-an-home/07.webp', span: 'col-span-6', aspect: 'aspect-[21/9]', type: 'image' }
+};
+
 export default function ProjectsShowcase() {
   const [projects, setProjects] = useState<any[]>(projectsData.slice(0, 8));
 
@@ -159,17 +169,67 @@ export default function ProjectsShowcase() {
         const response = await databases.listDocuments(
           APPWRITE_CONFIG.DATABASE_ID,
           APPWRITE_CONFIG.COLLECTIONS.PROJECTS,
-          [
-            Query.equal('isFavorite', true),
-            Query.limit(8),
-            Query.orderDesc('$createdAt')
-          ]
+          [Query.limit(50)]
         );
         if (response.documents.length > 0) {
-           setProjects(response.documents);
+          const docs = response.documents;
+          const docMap = new Map<string, any>();
+          docs.forEach(doc => docMap.set(doc.$id, doc));
+
+          const orderedIds = [
+            '69ce33b3003b8472378c',
+            '69cf2a5c0015e782cd1c',
+            '69cf29b60029fcf9fbe0',
+            '6a191f0000317b1bfb25',
+            '69ce3a20001c830d1bd1',
+            '69cf295a00172e76fc61',
+            '6a192001002d3af039d3'
+          ];
+
+          const mappedProjects: any[] = [];
+
+          orderedIds.forEach(id => {
+            const doc = docMap.get(id);
+            const local = LOCAL_CONFIGS[id];
+            if (doc && local) {
+              let tags: string[] = [];
+              if (typeof doc.tags === 'string' && doc.tags.trim() !== '') {
+                tags = doc.tags.split(',').map((t: string) => t.trim());
+              } else if (Array.isArray(doc.tags)) {
+                tags = doc.tags;
+              }
+
+              mappedProjects.push({
+                $id: doc.$id,
+                id: doc.$id,
+                slug: doc.slug || '',
+                title: doc.title || '',
+                category: doc.category || '',
+                year: doc.year || '',
+                color: doc.color || 'from-zinc-800/30 to-zinc-950/60',
+                image: local.image,
+                description: doc.description || '',
+                fullDescription: doc.fullDescription || '',
+                tags: tags,
+                span: local.span,
+                aspect: local.aspect,
+                type: local.type
+              });
+            } else {
+              const fallback = projectsData.find(p => p.id === id);
+              if (fallback) mappedProjects.push(fallback);
+            }
+          });
+
+          const verticalVideo = projectsData.find(p => p.id === 8);
+          if (verticalVideo) {
+            mappedProjects.splice(2, 0, verticalVideo);
+          }
+
+          setProjects(mappedProjects);
         }
       } catch (e) {
-        console.error("Failed to fetch favorite projects:", e);
+        console.error("Failed to fetch projects dynamically:", e);
       }
     };
     fetchFavoriteProjects();
@@ -218,10 +278,10 @@ export default function ProjectsShowcase() {
         className="grid grid-cols-12 gap-1.5 md:gap-4 lg:gap-6 auto-rows-[calc((100vw-3rem)*0.3)] md:auto-rows-[calc((100vw-10rem)*0.3)] lg:auto-rows-[calc((100vw-16rem)*0.3)]"
       >
         {projects.map((project, index) => (
-          <ProjectCard 
-            key={project.$id || project.id} 
-            project={project} 
-            variants={cardVariants} 
+          <ProjectCard
+            key={project.$id || project.id}
+            project={project}
+            variants={cardVariants}
           />
         ))}
       </motion.div>

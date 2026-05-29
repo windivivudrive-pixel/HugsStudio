@@ -16,30 +16,8 @@ interface LogoMarqueeProps {
   direction?: "left" | "right";
 }
 
-// All partner logos (cleaned up duplicates)
-const partnerLogos = [
-  "/image/logo partner/partner0.png",
-  "/image/logo partner/partner1.png",
-  "/image/logo partner/partner2.png",
-  "/image/logo partner/partner3.png",
-  "/image/logo partner/partner5.png",
-  "/image/logo partner/partner6.png",
-  "/image/logo partner/partner8.png",
-  "/image/logo partner/partner9.png",
-  "/image/logo partner/partner10.png",
-  "/image/logo partner/partner11.png",
-  "/image/logo partner/partner12.png",
-  "/image/logo partner/partner13.png",
-  "/image/logo partner/partner14.png",
-  "/image/logo partner/partner16.png",
-  "/image/logo partner/partner17.png",
-  "/image/logo partner/partner18.png",
-  "/image/logo partner/partner20.png",
-  "/image/logo partner/partner21.png",
-  "/image/logo partner/partner22.png",
-  "/image/logo partner/partner23.png",
-  "/image/logo partner/partner25.png",
-];
+// All partner logos (1.png to 13.png)
+const partnerLogos = Array.from({ length: 13 }, (_, i) => `/image/logo partner/${i + 1}.png`);
 
 export default function LogoMarquee({
   speed = "normal",
@@ -62,7 +40,7 @@ export default function LogoMarquee({
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="relative py-12 md:py-20 overflow-hidden border-b border-white/5"
+      className="relative py-3 md:py-14 overflow-hidden border-b border-white/5"
     >
       <div
         className="flex w-fit items-center"
@@ -72,30 +50,30 @@ export default function LogoMarquee({
         }}
       >
         {/* First set of logos */}
-        <div className="flex items-center gap-16 md:gap-32 pr-16 md:pr-32 shrink-0 min-w-max">
+        <div className="flex items-center gap-16 md:gap-40 pr-16 md:pr-40 shrink-0 min-w-max">
           {partnerLogos.map((logo, idx) => (
             <div key={`set1-${idx}`} className="flex items-center shrink-0">
               <Image
                 src={logo}
                 alt={`Partner ${idx}`}
-                width={80}
-                height={40}
-                className="h-8 md:h-14 w-auto object-contain transition-all duration-500 brightness-0 invert opacity-60 hover:brightness-100 hover:invert-0 hover:opacity-100"
+                width={180}
+                height={90}
+                className="h-10 md:h-28 w-auto object-contain transition-all duration-500 grayscale opacity-40 hover:grayscale-0 hover:opacity-100"
               />
             </div>
           ))}
         </div>
 
         {/* Second identical set of logos for seamless loop */}
-        <div className="flex items-center gap-16 md:gap-32 pr-16 md:pr-32 shrink-0 min-w-max">
+        <div className="flex items-center gap-16 md:gap-40 pr-16 md:pr-40 shrink-0 min-w-max">
           {partnerLogos.map((logo, idx) => (
             <div key={`set2-${idx}`} className="flex items-center shrink-0">
               <Image
                 src={logo}
                 alt={`Partner ${idx}`}
-                width={80}
-                height={40}
-                className="h-8 md:h-14 w-auto object-contain transition-all duration-500 brightness-0 invert opacity-60 hover:brightness-100 hover:invert-0 hover:opacity-100"
+                width={180}
+                height={90}
+                className="h-10 md:h-28 w-auto object-contain transition-all duration-500 grayscale opacity-40 hover:grayscale-0 hover:opacity-100"
               />
             </div>
           ))}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 /**
  * CustomCursor — A creative, glowing ring cursor that smoothly follows the mouse.
@@ -10,6 +11,9 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
  * - Uses Framer Motion springs for smooth, fluid movement
  */
 export default function CustomCursor() {
+  const pathname = usePathname();
+  const isAdminPage = pathname?.startsWith("/admin");
+
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -70,8 +74,8 @@ export default function CustomCursor() {
     };
   }, [mouseX, mouseY, isVisible]);
 
-  // Don't render on touch devices
-  if (isTouchDevice) return null;
+  // Don't render on touch devices or admin page
+  if (isTouchDevice || isAdminPage) return null;
 
   return (
     <>

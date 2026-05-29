@@ -4,8 +4,7 @@ import {
   motion, 
   useMotionTemplate, 
   useMotionValue, 
-  useAnimationFrame, 
-  wrap 
+  useAnimationFrame 
 } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -153,8 +152,8 @@ export default function NewsJournal() {
   useAnimationFrame((_: number, delta: number) => {
     if (isPaused || !contentWidth) return;
 
-    // Move left by default. 1.5px per frame roughly matches the old speed.
-    let moveBy = -1.5 * (delta / 16); // Normalize to 60fps
+    // Move left by default. 0.9px per frame roughly matches the old speed.
+    const moveBy = -0.9 * (delta / 16); // Normalize to 60fps
     x.set(x.get() + moveBy);
 
     // Wrap value to keep it between 0 and -contentWidth

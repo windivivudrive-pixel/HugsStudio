@@ -46,6 +46,11 @@
   cursor: none !important;
 }
 
+.admin-page,
+.admin-page * {
+  cursor: auto !important;
+}
+
 html {
   scroll-behavior: smooth;
 }

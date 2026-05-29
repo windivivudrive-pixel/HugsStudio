@@ -29,34 +29,26 @@ const slides: Slide[] = [
   {
     id: 1,
     title: "HUGs STUDIO",
-    subtitle: "Quay phim/ Chụp ảnh/ Sáng tạo nội dung",
+    subtitle: "Studio Chụp Ảnh Sản Phẩm & Quay TVC Tại Đà Nẵng",
     category: "",
-    gradient: "from-zinc-900/20 via-black/40 to-black/80",
-    video: "/image/video1.mp4",
+    gradient: "from-zinc-900/20 via-black/50 to-black/85",
+    video: "/video/loading 1.mp4",
   },
   {
     id: 2,
-    title: "THĂNG HẠNG\nVISUAL",
-    subtitle: "Nâng Tầm Thương Hiệu",
-    category: "",
-    gradient: "from-neutral-900/20 via-black/40 to-black/80",
-    video: "/image/video2.mp4",
-  },
-  {
-    id: 3,
     title: "KHẲNG ĐỊNH\nTHƯƠNG HIỆU",
     subtitle: "Mỗi dự án là một dấu ấn riêng",
     category: "",
-    gradient: "from-stone-900/40 via-black/60 to-black",
-    image: "/image/banner.png",
+    gradient: "from-stone-900/20 via-black/50 to-black/90",
+    image: "/image/du-an-home/banner1.webp",
   },
   {
-    id: 4,
+    id: 3,
     title: "QUAY PHIM\n& TVC",
     subtitle: "Sẵn sàng kể câu chuyện của bạn theo cách chưa từng có",
     category: "",
-    gradient: "from-gray-900/40 via-black/60 to-black",
-    image: "/image/banner 2.jpg",
+    gradient: "from-gray-900/20 via-black/50 to-black/90",
+    image: "/image/du-an-home/banner 2.1.webp",
   },
 ];
 
@@ -123,7 +115,7 @@ export default function HeroSlider() {
   return (
     <section
       ref={containerRef}
-      className="relative h-screen max-sm:h-auto max-sm:pb-16 w-full overflow-hidden"
+      className="relative w-full sm:aspect-video max-sm:h-auto max-sm:pt-[85px] max-sm:pb-16 overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       data-cursor-hover
@@ -148,10 +140,10 @@ export default function HeroSlider() {
           dragElastic={0.2}
           onDragEnd={handleDragEnd}
           style={{ x: dragX }}
-          className="absolute inset-0 max-sm:relative max-sm:inset-auto max-sm:flex max-sm:flex-col"
+          className="absolute inset-0 max-sm:relative max-sm:inset-auto max-sm:mx-4 max-sm:aspect-video max-sm:rounded-2xl max-sm:overflow-hidden max-sm:border max-sm:border-white/5"
         >
           {/* Background Media */}
-          <div className="absolute inset-0 z-0 sm:absolute sm:inset-0 max-sm:relative max-sm:inset-auto max-sm:w-[calc(100%-32px)] max-sm:aspect-video max-sm:flex-shrink-0 max-sm:mt-[90px] max-sm:rounded-xl max-sm:overflow-hidden max-sm:mx-4">
+          <div className="absolute inset-0 z-0">
             {slides[currentSlide].video ? (
               <video
                 key={slides[currentSlide].video}
@@ -161,14 +153,17 @@ export default function HeroSlider() {
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover contrast-110 brightness-[0.85] bg-black"
               >
-                <source src={slides[currentSlide].video} type="video/mp4" />
+                <source
+                  src={slides[currentSlide].video}
+                  type={slides[currentSlide].video.endsWith('.mov') ? 'video/quicktime' : 'video/mp4'}
+                />
               </video>
             ) : slides[currentSlide].image ? (
               <Image
                 src={slides[currentSlide].image!}
                 alt={slides[currentSlide].title}
                 fill
-                className="absolute inset-0 object-cover contrast-110 brightness-75 bg-black"
+                className="absolute inset-0 object-cover contrast-110 brightness-78 bg-black"
                 priority
               />
             ) : null}
@@ -206,20 +201,20 @@ export default function HeroSlider() {
             />
           </div>
 
-          {/* Bottom Gradient for Text Readability - Hide on mobile */}
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/50 to-transparent z-10 pointer-events-none max-sm:hidden" />
+          {/* Bottom Gradient for Text Readability */}
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/50 to-transparent z-10 pointer-events-none" />
 
           {/* Slide Content */}
           <motion.div
             style={{ x: textX }}
-            className="absolute bottom-0 left-0 w-full z-20 flex flex-col justify-start md:justify-end pt-8 md:pt-0 pb-16 md:pb-32 px-6 md:px-16 lg:px-24 max-sm:relative max-sm:inset-auto max-sm:flex-1"
+          className="absolute bottom-0 left-0 w-full z-20 flex flex-col justify-end pb-4 sm:pb-28 px-4 sm:px-16"
           >
             {/* Category tag */}
             <motion.span
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="font-body text-xs md:text-sm tracking-[0.3em] text-white/80 mb-4 md:mb-6"
+              className="font-body text-[9px] sm:text-sm tracking-[0.3em] text-white/80 mb-2 md:mb-6"
             >
               {slides[currentSlide].category}
             </motion.span>
@@ -231,7 +226,7 @@ export default function HeroSlider() {
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.7 }}
-                  className={`font-heading text-5xl md:text-7xl ${isTwoLines ? 'lg:text-[7.2rem]' : 'lg:text-[8rem]'} font-bold leading-[1] md:leading-[0.95] tracking-tight whitespace-pre-line mb-4 md:mb-6`}
+                  className={`font-heading text-lg sm:text-4xl md:text-6xl ${isTwoLines ? 'lg:text-[5rem]' : 'lg:text-[7.2rem]'} font-bold leading-[1.1] md:leading-[0.95] tracking-tight whitespace-pre-line mb-1.5 md:mb-6`}
                 >
                   {slides[currentSlide].title}
                 </motion.h1>
@@ -243,7 +238,7 @@ export default function HeroSlider() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.6 }}
-              className="font-body text-lg md:text-xl text-ash max-w-md"
+              className="font-body text-[11px] sm:text-lg md:text-xl text-ash max-w-xl md:max-w-2xl"
             >
               {slides[currentSlide].subtitle}
             </motion.p>
@@ -252,7 +247,7 @@ export default function HeroSlider() {
       </AnimatePresence>
 
       {/* Navigation Dots */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 max-sm:relative max-sm:bottom-auto max-sm:left-auto max-sm:transform-none max-sm:mt-8 max-sm:mx-auto max-sm:w-max">
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
         {slides.map((_, idx) => (
           <button
             key={idx}
@@ -270,8 +265,8 @@ export default function HeroSlider() {
         ))}
       </div>
 
-      {/* Slide Counter - move it to avoid overlapping text on mobile */}
-      <div className="absolute top-1/2 -translate-y-1/2 right-6 md:right-12 z-20 max-sm:top-[200px] text-white/50">
+      {/* Slide Counter */}
+      <div className="absolute top-1/2 -translate-y-1/2 right-6 md:right-12 z-20 max-sm:top-[195px] text-white/50">
         <div className="flex flex-col items-center gap-2">
           <span className="font-heading text-lg md:text-2xl font-bold text-white">
             {String(currentSlide + 1).padStart(2, "0")}
