@@ -77,6 +77,7 @@ const slideVariants = {
 export default function HeroSlider() {
   const [[currentSlide, direction], setSlide] = useState([0, 0]);
   const [isPaused, setIsPaused] = useState(false);
+  const [watchedSlides, setWatchedSlides] = useState<Record<number, boolean>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const dragX = useMotionValue(0);
 
@@ -92,12 +93,27 @@ export default function HeroSlider() {
     []
   );
 
+  const handleVideoEnded = useCallback(() => {
+    setWatchedSlides(prev => ({ ...prev, [currentSlide]: true }));
+    paginate(1);
+  }, [currentSlide, paginate]);
+
   // Auto-play
   useEffect(() => {
     if (isPaused) return;
+
+    const hasVideo = !!slides[currentSlide].video;
+    const isVideoWatched = watchedSlides[currentSlide];
+    const shouldWaitForVideo = hasVideo && !isVideoWatched;
+
+    if (shouldWaitForVideo) {
+      // Wait for the video to complete and trigger handleVideoEnded, no 5s timer
+      return;
+    }
+
     const interval = setInterval(() => paginate(1), 5000);
     return () => clearInterval(interval);
-  }, [isPaused, paginate]);
+  }, [isPaused, paginate, currentSlide, watchedSlides]);
 
   // Handle drag end to determine swipe direction
   const handleDragEnd = (_: unknown, info: PanInfo) => {
@@ -147,10 +163,23 @@ export default function HeroSlider() {
             {slides[currentSlide].video ? (
               <video
                 key={slides[currentSlide].video}
+                ref={(el) => {
+                  if (el) {
+                    el.defaultMuted = true;
+                    el.muted = true;
+                    const playPromise = el.play();
+                    if (playPromise !== undefined) {
+                      playPromise.catch(e => console.log("Autoplay prevented:", e));
+                    }
+                  }
+                }}
                 autoPlay
                 muted
-                loop
+                loop={!!watchedSlides[currentSlide]}
+                onEnded={handleVideoEnded}
                 playsInline
+                preload="auto"
+                disablePictureInPicture
                 className="absolute inset-0 w-full h-full object-cover contrast-110 brightness-[0.85] bg-black"
               >
                 <source

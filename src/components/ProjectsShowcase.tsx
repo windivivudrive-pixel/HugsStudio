@@ -84,12 +84,23 @@ function ProjectCard({ project, variants, className = "" }: { project: any; vari
           <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-110">
             {project.type === 'video' && project.video ? (
               <video
+                ref={(el) => {
+                  if (el) {
+                    el.defaultMuted = true;
+                    el.muted = true;
+                    const playPromise = el.play();
+                    if (playPromise !== undefined) {
+                      playPromise.catch(e => console.log("Autoplay prevented:", e));
+                    }
+                  }
+                }}
                 src={project.video}
                 autoPlay
                 muted
                 loop
                 playsInline
                 preload="metadata"
+                disablePictureInPicture
                 className="object-cover w-full h-full contrast-125 brightness-90 group-hover:brightness-100 transition-all duration-700"
               />
             ) : (
