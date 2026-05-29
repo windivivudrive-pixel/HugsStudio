@@ -16,8 +16,8 @@ interface LogoMarqueeProps {
   direction?: "left" | "right";
 }
 
-// All partner logos (1.png to 13.png)
-const partnerLogos = Array.from({ length: 13 }, (_, i) => `/image/logo partner/${i + 1}.png`);
+// All partner logos (only including existing ones)
+const partnerLogos = [1, 2, 3, 4, 5, 6, 7, 9, 11, 12].map((num) => `/image/logo partner/${num}.png`);
 
 export default function LogoMarquee({
   speed = "normal",

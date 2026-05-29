@@ -52,25 +52,22 @@ const slides: Slide[] = [
   },
 ];
 
-// Slide transition variants with blur effect
+// Slide transition variants optimized for smooth performance and cross-fading
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? "100%" : "-100%",
+    x: direction > 0 ? "10%" : "-10%",
     opacity: 0,
-    filter: "blur(16px)",
-    scale: 1.05,
+    scale: 1.02,
   }),
   center: {
     x: 0,
     opacity: 1,
-    filter: "blur(0px)",
     scale: 1,
   },
   exit: (direction: number) => ({
-    x: direction > 0 ? "-100%" : "100%",
+    x: direction > 0 ? "-10%" : "10%",
     opacity: 0,
-    filter: "blur(16px)",
-    scale: 0.95,
+    scale: 0.98,
   }),
 };
 
@@ -136,8 +133,13 @@ export default function HeroSlider() {
       onMouseLeave={() => setIsPaused(false)}
       data-cursor-hover
     >
+      {/* Mobile Placeholder to maintain height since slides will be absolute */}
+      <div className="sm:hidden w-full px-4 pointer-events-none invisible">
+        <div className="w-full aspect-video" />
+      </div>
+
       {/* Slides */}
-      <AnimatePresence initial={false} custom={direction} mode="wait">
+      <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={currentSlide}
           custom={direction}
@@ -145,18 +147,8 @@ export default function HeroSlider() {
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{
-            x: { type: "spring", stiffness: 200, damping: 30 },
-            opacity: { duration: 0.5 },
-            filter: { duration: 0.6 },
-            scale: { duration: 0.6 },
-          }}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
-          onDragEnd={handleDragEnd}
-          style={{ x: dragX }}
-          className="absolute inset-0 max-sm:relative max-sm:inset-auto max-sm:mx-4 max-sm:aspect-video max-sm:rounded-2xl max-sm:overflow-hidden max-sm:border max-sm:border-white/5"
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-0 max-sm:top-[85px] max-sm:bottom-16 max-sm:left-4 max-sm:right-4 max-sm:rounded-2xl max-sm:overflow-hidden max-sm:border max-sm:border-white/5 pointer-events-none"
         >
           {/* Background Media */}
           <div className="absolute inset-0 z-0">
@@ -275,6 +267,16 @@ export default function HeroSlider() {
         </motion.div>
       </AnimatePresence>
 
+      {/* Invisible Drag Overlay */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={handleDragEnd}
+        style={{ x: dragX }}
+        className="absolute inset-0 z-10 touch-pan-y"
+      />
+
       {/* Navigation Dots */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
         {slides.map((_, idx) => (
@@ -287,7 +289,7 @@ export default function HeroSlider() {
             <div
               className={`h-1 rounded-full transition-all duration-500 ${idx === currentSlide
                 ? "w-8 bg-white"
-                : "w-4 bg-smoke group-hover:bg-ash"
+                : "w-4 bg-white/20 group-hover:bg-white/50"
                 }`}
             />
           </button>
@@ -300,8 +302,8 @@ export default function HeroSlider() {
           <span className="font-heading text-lg md:text-2xl font-bold text-white">
             {String(currentSlide + 1).padStart(2, "0")}
           </span>
-          <div className="w-px h-8 bg-smoke max-sm:h-4" />
-          <span className="font-heading text-xs md:text-sm text-ash">
+          <div className="w-px h-8 bg-white/20 max-sm:h-4" />
+          <span className="font-heading text-xs md:text-sm text-white/40">
             {String(slides.length).padStart(2, "0")}
           </span>
         </div>

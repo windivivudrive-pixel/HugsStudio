@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 /**
  * Navbar — Sticky glassmorphic navigation bar.
@@ -16,6 +17,7 @@ import Link from "next/link";
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -59,17 +61,20 @@ export default function Navbar() {
 
         {/* Desktop Nav Links */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="font-body text-[15px] text-ash hover:text-white transition-colors duration-300 relative group"
-              data-cursor-hover
-            >
-              {link.label}
-              <span className="absolute -bottom-1 left-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full" />
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = pathname?.startsWith(link.href);
+            return (
+              <a
+                key={link.label}
+                href={link.href}
+                className={`font-body text-[15px] transition-colors duration-300 relative group ${isActive ? "text-white" : "text-ash hover:text-white"}`}
+                data-cursor-hover
+              >
+                {link.label}
+                <span className={`absolute -bottom-1 left-0 h-px bg-white transition-all duration-300 ${isActive ? "w-full" : "w-0 group-hover:w-full"}`} />
+              </a>
+            );
+          })}
         </div>
 
         {/* CTA Button */}
