@@ -47,8 +47,8 @@ export default function ServiceSection() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
   return (
-    <section className="bg-obsidian py-24 md:py-32 border-t border-white/5">
-      <div className="container mx-auto px-6">
+    <section className="bg-obsidian py-24 md:py-32 border-t border-white/5 px-6 md:px-20 lg:px-32">
+      <div className="w-full">
         <div className="mb-16 md:mb-24">
           <span className="font-body text-xs tracking-[0.3em] text-white/40 uppercase mb-4 block">
             Chuyên Môn
