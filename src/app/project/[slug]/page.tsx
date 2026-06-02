@@ -1,14 +1,11 @@
-"use client";
-
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { motion } from "framer-motion";
 import { projectsData, Project } from "@/data/projects";
-import React, { useEffect, useState, useCallback } from "react";
 import { databases, APPWRITE_CONFIG } from "@/lib/appwrite";
 import { Query } from "appwrite";
-import Footer from "@/components/Footer";
+import ProjectDetailClient from "@/components/ProjectDetailClient";
+import { Metadata } from "next";
+
+export const revalidate = 60; // ISR - revalidate every 60 seconds
 
 interface Props {
   params: Promise<{
@@ -16,319 +13,154 @@ interface Props {
   }>;
 }
 
-export default function ProjectDetailPage({ params }: Props) {
-  const resolvedParams = React.use(params);
-  const slug = resolvedParams.slug;
-  
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    async function fetchProject() {
-      try {
-        // 1. Try Appwrite
-        const response = await databases.listDocuments(
-          APPWRITE_CONFIG.DATABASE_ID,
-          APPWRITE_CONFIG.COLLECTIONS.PROJECTS,
-          [Query.equal('slug', slug), Query.limit(1)]
-        );
-
-        if (response.documents.length > 0) {
-          const doc = response.documents[0];
-          // Tags might be stored as a string "tag1, tag2" or array
-          let tags = doc.tags;
-          if (typeof tags === 'string') {
-            tags = tags.split(',').map((t: string) => t.trim());
-          }
-
-          setProject({
-            id: doc.$id,
-            slug: doc.slug,
-            title: doc.title || "",
-            category: doc.category || "",
-            year: doc.year || "",
-            color: doc.color || "",
-            image: doc.image || "",
-            description: doc.description || "",
-            fullDescription: doc.fullDescription || "",
-            tags: Array.isArray(tags) ? tags : [],
-            gallery: doc.gallery || [],
-            span: doc.span || "",
-            aspect: doc.aspect || ""
-          });
-        } else {
-          // 2. Try Mock Data
-          const mock = projectsData.find((p) => p.slug === slug);
-          if (mock) {
-            setProject({
-              ...mock,
-              fullDescription: mock.fullDescription || "",
-              tags: mock.tags || [],
-              gallery: mock.gallery || []
-            });
-          } else {
-            setProject(null);
-          }
-        }
-      } catch (err) {
-        console.warn("Appwrite project fetch failed:", err);
-        const mock = projectsData.find((p) => p.slug === slug);
-        if (mock) {
-          setProject({
-            ...mock,
-            fullDescription: mock.fullDescription || "",
-            tags: mock.tags || [],
-            gallery: mock.gallery || []
-          });
-        } else {
-          setProject(null);
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchProject();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-obsidian flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin" />
-      </div>
+async function getProject(slug: string): Promise<Project | null> {
+  try {
+    const response = await databases.listDocuments(
+      APPWRITE_CONFIG.DATABASE_ID,
+      APPWRITE_CONFIG.COLLECTIONS.PROJECTS,
+      [Query.equal('slug', slug), Query.limit(1)]
     );
+
+    if (response.documents.length > 0) {
+      const doc = response.documents[0];
+      let tags = doc.tags;
+      if (typeof tags === 'string') {
+        tags = tags.split(',').map((t: string) => t.trim());
+      }
+
+      return {
+        id: doc.$id,
+        slug: doc.slug,
+        title: doc.title || "",
+        category: doc.category || "",
+        year: doc.year || "",
+        color: doc.color || "",
+        image: doc.image || "",
+        description: doc.description || "",
+        fullDescription: doc.fullDescription || "",
+        tags: Array.isArray(tags) ? tags : [],
+        gallery: doc.gallery || [],
+        span: doc.span || "",
+        aspect: doc.aspect || ""
+      };
+    }
+  } catch (err) {
+    console.warn("Appwrite project fetch failed inside server:", err);
   }
+
+  // Option A Fallback: Mock Data
+  const mock = projectsData.find((p) => p.slug === slug);
+  if (mock) {
+    return {
+      ...mock,
+      fullDescription: mock.fullDescription || "",
+      tags: mock.tags || [],
+      gallery: mock.gallery || []
+    };
+  }
+
+  return null;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const project = await getProject(slug);
+
+  if (!project) {
+    return {
+      title: "Không tìm thấy dự án — HUGs STUDIO",
+    };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hugs-studio.vercel.app';
+  const imageUrl = project.image.startsWith('http') ? project.image : `${siteUrl}${project.image}`;
+  
+  return {
+    title: `${project.title} — Dự án của HUGs STUDIO`,
+    description: project.description || `Chi tiết dự án ${project.title} thực hiện bởi HUGs STUDIO Đà Nẵng.`,
+    alternates: {
+      canonical: `/project/${slug}`,
+    },
+    openGraph: {
+      title: `${project.title} — Dự án của HUGs STUDIO`,
+      description: project.description,
+      url: `${siteUrl}/project/${slug}`,
+      type: "article",
+      images: [
+        {
+          url: imageUrl,
+          alt: project.title,
+        }
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.title} — HUGs STUDIO`,
+      description: project.description,
+      images: [imageUrl],
+    }
+  };
+}
+
+export async function generateStaticParams() {
+  const params: { slug: string }[] = [];
+  
+  // 1. Add mock slugs
+  projectsData.forEach(p => {
+    if (p.slug) params.push({ slug: p.slug });
+  });
+
+  // 2. Add Appwrite slugs if possible
+  try {
+    const response = await databases.listDocuments(
+      APPWRITE_CONFIG.DATABASE_ID,
+      APPWRITE_CONFIG.COLLECTIONS.PROJECTS,
+      [Query.limit(100)]
+    );
+    response.documents.forEach((doc: any) => {
+      if (doc.slug) {
+        params.push({ slug: doc.slug });
+      }
+    });
+  } catch (error) {
+    console.warn("generateStaticParams projects fetch failed:", error);
+  }
+
+  // Remove duplicates
+  const uniqueParams = Array.from(new Set(params.map(p => p.slug))).map(slug => ({ slug }));
+  return uniqueParams;
+}
+
+export default async function ProjectDetailPage({ params }: Props) {
+  const { slug } = await params;
+  const project = await getProject(slug);
 
   if (!project) {
     notFound();
   }
 
-  const rawContent = (project.fullDescription || "").replace(/&nbsp;|\u00A0/g, ' ');
-  const imgUrlRegex = /<img[^>]+src="([^">]+)"/g;
-  const richTextImageUrls = Array.from(rawContent.matchAll(imgUrlRegex)).map(match => match[1]);
-  
-  // Combine gallery images with legacy rich text images to support older posts
-  const allImageUrls = [...(project.gallery || []), ...richTextImageUrls];
-
-  // Remove <img> tags, then remove empty <p> tags
-  const textOnlyContent = rawContent
-    .replace(/<img[^>]+>/g, '')
-    .replace(/<p>[\s\n]*(?:<br\s*\/?>)?[\s\n]*<\/p>/g, '')
-    .trim();
-  const hasTextContent = textOnlyContent.length > 0;
+  const schemaMarkup = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    "name": project.title,
+    "description": project.description,
+    "image": project.image.startsWith('http') ? project.image : `https://hugs-studio.vercel.app${project.image}`,
+    "creator": {
+      "@type": "LocalBusiness",
+      "name": "HUGs STUDIO",
+      "url": "https://hugs-studio.vercel.app"
+    },
+    "genre": project.category,
+    "dateCreated": project.year
+  };
 
   return (
     <>
-      <main className="min-h-screen bg-obsidian text-white pt-24 pb-20 selection:bg-white/20 relative z-10">
-        <article className="container mx-auto px-6 md:px-12 lg:px-24">
-          
-          {/* Back Button */}
-          <div className="mb-12">
-            <Link 
-              href="/project"
-              className="inline-flex items-center gap-2 font-body text-sm text-ash hover:text-white transition-colors group"
-              data-cursor-hover
-            >
-              <svg width="16" height="16" viewBox="0 0 12 12" fill="none" className="transition-transform group-hover:-translate-x-1">
-                <path d="M11 6H1M1 6L5 2M1 6L5 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Quay lại Dự Án
-            </Link>
-          </div>
-
-          {/* Project Header */}
-          <header className="max-w-4xl mx-auto mb-16 text-center">
-            <div className="flex items-center justify-center gap-4 font-heading text-xs uppercase tracking-wider text-ash mb-6">
-              <span className="text-white/80">{project.category}</span>
-              <div className="w-1 h-1 rounded-full bg-white/20" />
-              <span>{project.year}</span>
-            </div>
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="font-heading text-4xl md:text-5xl lg:text-7xl font-bold leading-tight mb-8"
-            >
-              {project.title}
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="font-body text-xl text-ash max-w-2xl mx-auto leading-relaxed"
-            >
-              {project.description}
-            </motion.p>
-          </header>
-
-          {/* Hero Image */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="relative w-full aspect-[16/9] max-w-6xl mx-auto rounded-2xl overflow-hidden mb-20 bg-white/5 border border-white/10"
-          >
-            <Image
-              src={project.image || "/image/placeholder.png"}
-              alt={project.title}
-              fill
-              className="object-contain"
-              priority
-            />
-          </motion.div>
-
-          {/* Project Content */}
-          <div className="max-w-4xl mx-auto">
-            {hasTextContent && (
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="rich-text-content font-body text-lg text-white/80 leading-relaxed mb-16"
-                dangerouslySetInnerHTML={{ __html: textOnlyContent }}
-              />
-            )}
-          </div>
-          
-          {/* Project Image Gallery (Creative Masonry Layout) */}
-          {allImageUrls.length > 0 && (
-            <div className="max-w-7xl mx-auto mb-20 px-4 md:px-0">
-               <motion.div 
-                 initial={{ opacity: 0, y: 40 }}
-                 whileInView={{ opacity: 1, y: 0 }}
-                 viewport={{ once: true }}
-                 transition={{ duration: 0.6 }}
-                 className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8"
-               >
-                 {allImageUrls.map((url, idx) => (
-                   <div
-                     key={idx}
-                     className="break-inside-avoid relative rounded-2xl overflow-hidden group border border-white/10 bg-white/5 shadow-2xl cursor-pointer"
-                     onClick={() => setLightboxIndex(idx)}
-                     data-cursor-hover
-                   >
-                     <img
-                       src={url}
-                       alt={`${project.title || 'Project'} Showcase ${idx + 1}`}
-                       className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                       loading="lazy"
-                     />
-                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500 pointer-events-none flex items-center justify-center">
-                       <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-80 transition-opacity duration-300 drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                       </svg>
-                     </div>
-                   </div>
-                 ))}
-               </motion.div>
-            </div>
-          )}
-
-          {/* Lightbox Modal */}
-          {lightboxIndex !== null && (
-            <div
-              className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-8"
-              onClick={() => setLightboxIndex(null)}
-            >
-              {/* Close Button */}
-              <button
-                className="absolute top-6 right-6 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors duration-200"
-                onClick={() => setLightboxIndex(null)}
-                aria-label="Đóng"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-
-              {/* Prev Button */}
-              {lightboxIndex > 0 && (
-                <button
-                  className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors duration-200"
-                  onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex - 1); }}
-                  aria-label="Ảnh trước"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M15 18l-6-6 6-6" />
-                  </svg>
-                </button>
-              )}
-
-              {/* Next Button */}
-              {lightboxIndex < allImageUrls.length - 1 && (
-                <button
-                  className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors duration-200"
-                  onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex + 1); }}
-                  aria-label="Ảnh tiếp"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                </button>
-              )}
-
-              {/* Image */}
-              <motion.img
-                key={lightboxIndex}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                src={allImageUrls[lightboxIndex]}
-                alt={`${project.title || 'Project'} Showcase ${lightboxIndex + 1}`}
-                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              />
-
-              {/* Counter */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 font-body text-sm text-white/60">
-                {lightboxIndex + 1} / {allImageUrls.length}
-              </div>
-            </div>
-          )}
-
-          <div className="max-w-4xl mx-auto">
-            {/* Tags / Skills */}
-            <div className="pt-12 border-t border-white/10">
-              <h3 className="font-heading text-xl font-bold text-white mb-6 uppercase tracking-widest">
-                Lĩnh vực & Kỹ thuật
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {project.tags.map((tag) => (
-                  <span 
-                    key={tag}
-                    className="px-6 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-body text-ash hover:text-white hover:border-white/30 transition-all duration-300"
-                    data-cursor-hover
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
-            {/* CTA */}
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="mt-20 p-12 rounded-3xl bg-white/5 border border-white/10 text-center"
-            >
-              <h3 className="font-heading text-3xl font-bold mb-4">Bạn có dự án tương tự?</h3>
-              <p className="font-body text-ash mb-8 max-w-md mx-auto">Hãy để chúng tôi giúp bạn hiện thực hóa những ý tưởng sáng tạo nhất.</p>
-              <motion.a 
-                href="/#contact" 
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                className="inline-block bg-white text-black px-10 py-4 rounded-full font-heading font-bold hover:bg-ash transition-colors duration-300"
-                data-cursor-hover
-              >
-                Liên hệ ngay
-              </motion.a>
-            </motion.div>
-          </div>
-        </article>
-      </main>
-      <Footer />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+      />
+      <ProjectDetailClient project={project} />
     </>
   );
 }

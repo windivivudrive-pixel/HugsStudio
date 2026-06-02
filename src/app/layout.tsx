@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/image/banner.png",
+        url: "/image/du-an-home/banner1.webp",
         width: 1200,
         height: 630,
         alt: "HUGs STUDIO Banner",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     title: "HUGs STUDIO — Studio Chụp Sản Phẩm & Quay TVC Tại Đà Nẵng",
     description:
       "Đơn vị sản xuất nội dung hình ảnh, studio chụp sản phẩm và quay TVC hàng đầu tại Đà Nẵng, mang đến sự đột phá cho thương hiệu.",
-    images: ["/image/banner.png"],
+    images: ["/image/du-an-home/banner1.webp"],
   },
   icons: {
     icon: "/image/favicon.png",
@@ -85,7 +85,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
               name: "HUGs STUDIO",
-              image: "https://hugs-studio.vercel.app/image/banner.png",
+              image: "https://hugs-studio.vercel.app/image/du-an-home/banner1.webp",
               description: "HUGS STUDIO là đơn vị hàng đầu về sản xuất nội dung hình ảnh, video, studio chụp sản phẩm chuyên nghiệp và quay TVC tại Đà Nẵng.",
               address: {
                 "@type": "PostalAddress",

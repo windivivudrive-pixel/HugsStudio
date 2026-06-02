@@ -1,11 +1,13 @@
-export const dynamic = 'force-dynamic';
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
-import { Article } from "@/data/news";
+import { Article, articlesData } from "@/data/news";
 import { databases, APPWRITE_CONFIG } from "@/lib/appwrite";
 import { Query } from "appwrite";
+import { Metadata } from "next";
+
+export const revalidate = 60; // ISR - revalidate every 60 seconds
 
 interface Props {
   params: Promise<{
@@ -13,11 +15,7 @@ interface Props {
   }>;
 }
 
-export default async function ArticlePage({ params }: Props) {
-  const { slug } = await params;
-
-  let article: Article | null = null;
-
+async function getArticle(slug: string): Promise<Article | null> {
   try {
     // 1. Try to fetch from Appwrite
     const response = await databases.listDocuments(
@@ -28,7 +26,7 @@ export default async function ArticlePage({ params }: Props) {
 
     if (response.documents.length > 0) {
       const doc = response.documents[0];
-      article = {
+      return {
         id: doc.$id,
         slug: doc.slug,
         title: doc.title,
@@ -39,19 +37,130 @@ export default async function ArticlePage({ params }: Props) {
       };
     }
   } catch (error) {
-    console.error("Appwrite detail fetch failed:", error);
+    console.error("Appwrite news detail fetch failed inside server:", error);
   }
+
+  // 2. Option A Fallback: Try to fetch from Mock Data
+  const mock = articlesData.find((a) => a.slug === slug);
+  if (mock) {
+    return mock;
+  }
+
+  return null;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArticle(slug);
+
+  if (!article) {
+    return {
+      title: "Không tìm thấy bài viết — HUGs STUDIO",
+    };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hugs-studio.vercel.app';
+  const imageUrl = article.image.startsWith('http') ? article.image : `${siteUrl}${article.image}`;
+  const excerpt = article.content.replace(/<[^>]*>/g, '').replace(/&nbsp;|\u00A0/g, ' ').substring(0, 160) + '...';
+
+  return {
+    title: `${article.title} — HUGs STUDIO Journal`,
+    description: excerpt,
+    alternates: {
+      canonical: `/news/${slug}`,
+    },
+    openGraph: {
+      title: `${article.title} — HUGs STUDIO Journal`,
+      description: excerpt,
+      url: `${siteUrl}/news/${slug}`,
+      type: "article",
+      images: [
+        {
+          url: imageUrl,
+          alt: article.title,
+        }
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${article.title} — HUGs STUDIO`,
+      description: excerpt,
+      images: [imageUrl],
+    }
+  };
+}
+
+export async function generateStaticParams() {
+  const params: { slug: string }[] = [];
+  
+  // 1. Add mock slugs
+  articlesData.forEach(a => {
+    if (a.slug) params.push({ slug: a.slug });
+  });
+
+  // 2. Add Appwrite slugs if possible
+  try {
+    const response = await databases.listDocuments(
+      APPWRITE_CONFIG.DATABASE_ID,
+      APPWRITE_CONFIG.COLLECTIONS.NEWS,
+      [Query.limit(100)]
+    );
+    response.documents.forEach((doc: any) => {
+      if (doc.slug) {
+        params.push({ slug: doc.slug });
+      }
+    });
+  } catch (error) {
+    console.warn("generateStaticParams news fetch failed:", error);
+  }
+
+  // Remove duplicates
+  const uniqueParams = Array.from(new Set(params.map(a => a.slug))).map(slug => ({ slug }));
+  return uniqueParams;
+}
+
+export default async function ArticlePage({ params }: Props) {
+  const { slug } = await params;
+  const article = await getArticle(slug);
 
   if (!article) {
     notFound();
   }
 
-  // Calculate read time roughly (strip tags first )
+  // Calculate read time roughly (strip tags first)
   const plainText = article.content.replace(/<[^>]*>/g, '');
   const readTime = Math.max(1, Math.ceil(plainText.split(' ').length / 200));
 
+  const schemaMarkup = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": article.title,
+    "image": [
+      article.image.startsWith('http') ? article.image : `https://hugs-studio.vercel.app${article.image}`
+    ],
+    "datePublished": article.date,
+    "author": {
+      "@type": "Person",
+      "name": "Admin",
+      "url": "https://hugs-studio.vercel.app/about"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "HUGs STUDIO",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://hugs-studio.vercel.app/image/favicon.png"
+      }
+    },
+    "description": article.content.replace(/<[^>]*>/g, '').replace(/&nbsp;|\u00A0/g, ' ').substring(0, 160)
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+      />
       <main className="min-h-screen bg-obsidian text-white pt-24 pb-20 selection:bg-white/20 relative z-10">
         <article className="container mx-auto px-6 md:px-12 lg:px-24">
 
