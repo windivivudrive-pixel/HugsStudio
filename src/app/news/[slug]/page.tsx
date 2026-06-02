@@ -49,6 +49,27 @@ async function getArticle(slug: string): Promise<Article | null> {
   return null;
 }
 
+// Helper function to extract FAQs from article HTML content
+function extractFAQs(htmlContent: string): { question: string; answer: string }[] {
+  const faqs: { question: string; answer: string }[] = [];
+  const cleanContent = htmlContent.replace(/&nbsp;|\u00A0/g, ' ');
+  
+  // Match headings (h2-h5), paragraphs or strong tags containing questions (ending with '?')
+  // followed by subsequent answer paragraphs
+  const headingRegex = /<(h[2-5]|p|strong)[^>]*>(.*?\?)\s*<\/\1>\s*<p[^>]*>(.*?)<\/p>/gi;
+  
+  let match;
+  while ((match = headingRegex.exec(cleanContent)) !== null) {
+    const question = match[2].replace(/<[^>]*>/g, '').trim();
+    const answer = match[3].replace(/<[^>]*>/g, '').trim();
+    if (question && answer) {
+      faqs.push({ question, answer });
+    }
+  }
+  
+  return faqs;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = await getArticle(slug);
@@ -155,12 +176,32 @@ export default async function ArticlePage({ params }: Props) {
     "description": article.content.replace(/<[^>]*>/g, '').replace(/&nbsp;|\u00A0/g, ' ').substring(0, 160)
   };
 
+  const faqs = extractFAQs(article.content);
+  const faqSchema = faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  } : null;
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
       <main className="min-h-screen bg-obsidian text-white pt-24 pb-20 selection:bg-white/20 relative z-10">
         <article className="container mx-auto px-6 md:px-12 lg:px-24">
 
