@@ -4,6 +4,7 @@ import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Article } from "@/data/news";
+import { formatDisplayDate } from "@/lib/date";
 
 interface QuickViewSidebarProps {
   articles: Article[];
@@ -70,12 +71,12 @@ function SidebarItem({ article, index }: { article: Article; index: number }) {
             {article.title}
           </h3>
           <span className="text-[10px] font-body text-white/30 mt-1 block uppercase tracking-tighter">
-            {article.date}
+            {formatDisplayDate(article.date)}
           </span>
         </div>
 
         {/* Thumbnail */}
-        <div className="relative w-20 aspect-[4/3] rounded-md overflow-hidden shrink-0 bg-white/5 border border-white/5">
+        <div className="relative w-20 aspect-[3/2] rounded-md overflow-hidden shrink-0 bg-white/5 border border-white/5">
           <Image
             src={article.image}
             alt={article.title}

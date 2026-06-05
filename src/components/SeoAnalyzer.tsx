@@ -13,6 +13,7 @@ export default function SeoAnalyzer({ title = "", description = "", content = ""
 
   // Content parsing to count words and detect elements
   const stripHtml = (html: string) => {
+    if (typeof document === "undefined") return "";
     const tmp = document.createElement("div");
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || "";
@@ -117,6 +118,30 @@ export default function SeoAnalyzer({ title = "", description = "", content = ""
     return <XCircle className="w-4 h-4 text-red-500" />;
   };
 
+  // Helper to generate a slug preview
+  const getSlugPreview = (t: string) => {
+    if (!t) return "bai-viet";
+    return t
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remove accents
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .substring(0, 40);
+  };
+
+  const slugPreview = getSlugPreview(title);
+  const titlePreview = title.trim() || (type === "project" ? "Tiêu đề dự án..." : "Tiêu đề bài viết...");
+
+  const cleanContent = stripHtml(content).trim();
+  const descPreview = type === "project" 
+    ? (description.trim() || "Nhập mô tả ngắn của dự án để hiển thị kết quả tìm kiếm Google tại đây...")
+    : (cleanContent
+        ? (cleanContent.substring(0, 160) + (cleanContent.length > 160 ? "..." : ""))
+        : "Nhập nội dung bài viết để hiển thị kết quả mô tả tìm kiếm Google tại đây...");
+
   return (
     <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6 sticky top-6">
       <div className="flex items-center justify-between mb-4">
@@ -166,6 +191,31 @@ export default function SeoAnalyzer({ title = "", description = "", content = ""
           ✨ Tuyệt vời! Bài viết đã được tối ưu SEO rất tốt.
         </div>
       )}
+
+      {/* Google Preview */}
+      <div className="mt-6 pt-6 border-t border-white/10 text-left">
+        <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 font-sans">
+          Xem trước kết quả Google (Snippet Preview)
+        </h4>
+        <div className="bg-[#141414] border border-white/5 p-4 rounded-xl text-left">
+          {/* Breadcrumb / URL */}
+          <div className="text-[12px] text-white/50 truncate flex items-center gap-1 mb-1 font-sans">
+            <span>hugs-studio.vercel.app</span>
+            <span className="text-white/20">›</span>
+            <span>{type === "project" ? "project" : "news"}</span>
+            <span className="text-white/20">›</span>
+            <span className="text-white/30 truncate">{slugPreview}</span>
+          </div>
+          {/* Google Title */}
+          <div className="text-[#8ab4f8] text-[16px] font-medium leading-snug hover:underline cursor-pointer line-clamp-1 mb-1 font-sans">
+            {titlePreview}
+          </div>
+          {/* Google Snippet / Description */}
+          <div className="text-white/60 text-[13px] leading-relaxed font-sans line-clamp-2">
+            {descPreview}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

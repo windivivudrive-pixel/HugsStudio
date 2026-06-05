@@ -269,10 +269,13 @@ body {
 }
 
 .rich-text-content img {
+  display: block;
   max-width: 100%;
+  max-height: 550px;
+  width: auto;
   height: auto;
+  margin: 2.5rem auto;
   border-radius: 1rem;
-  margin: 2.5rem 0;
   border: 1px solid var(--color-glass-border);
 }
 
@@ -309,4 +312,20 @@ body {
   aspect-ratio: 16 / 9;
   border-radius: 1rem;
   margin: 2rem 0;
+}
+
+/* ═══ Quill Editor Admin Selection Styles ═══ */
+.ql-editor {
+  color: #1a1a1a !important; /* Ensure text is dark and readable on white background */
+}
+
+/* Override selection colors inside the editor to prevent white-on-white text */
+.ql-editor ::selection {
+  background: #2563eb !important; /* Clear blue selection background */
+  color: #ffffff !important;      /* White text color for selected text */
+}
+
+.ql-editor::-moz-selection {
+  background: #2563eb !important;
+  color: #ffffff !important;
 }

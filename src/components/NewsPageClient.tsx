@@ -6,6 +6,7 @@ import Link from "next/link";
 import React from "react";
 import Footer from "@/components/Footer";
 import { Article } from "@/data/news";
+import { formatDisplayDate } from "@/lib/date";
 
 // Relative components import mapped to absolute paths
 import QuickViewSidebar from "@/app/news/components/QuickViewSidebar";
@@ -44,7 +45,7 @@ function HeroArticleGlow({ article }: { article: Article }) {
   }
   return (
     <Link href={`/news/${article.slug}`} className="group block" onMouseMove={handleMouseMove} data-cursor-hover>
-      <div className="relative aspect-[16/10] rounded-lg md:rounded-xl overflow-hidden bg-white/5 p-[1px]">
+      <div className="relative aspect-[3/2] rounded-lg md:rounded-xl overflow-hidden bg-white/5 p-[1px]">
         <motion.div
           className="pointer-events-none absolute -inset-px rounded-lg md:rounded-xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
           style={{
@@ -66,7 +67,7 @@ function HeroArticleGlow({ article }: { article: Article }) {
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="absolute top-4 left-4">
+          <div className="absolute bottom-4 right-4 z-20">
             <span className="px-3 py-1 rounded-full border border-white/20 bg-black/40 backdrop-blur-md font-heading font-medium text-white text-xs">
               {article.category}
             </span>
@@ -81,7 +82,7 @@ function HeroArticleGlow({ article }: { article: Article }) {
           <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-white/40 to-white/90 shrink-0" />
           <span className="text-xs font-body text-white/50">Admin</span>
           <span className="text-white/20 text-xs">·</span>
-          <span className="text-xs font-body text-white/40">{article.date}</span>
+          <span className="text-xs font-body text-white/40">{formatDisplayDate(article.date)}</span>
         </div>
       </div>
     </Link>
@@ -98,7 +99,7 @@ function SecondaryArticleGlow({ article }: { article: Article }) {
   }
   return (
     <Link href={`/news/${article.slug}`} className="group block" onMouseMove={handleMouseMove} data-cursor-hover>
-      <div className="relative aspect-[4/3] rounded-lg md:rounded-xl overflow-hidden bg-white/5 p-[1px]">
+      <div className="relative aspect-[3/2] rounded-lg md:rounded-xl overflow-hidden bg-white/5 p-[1px]">
         <motion.div
           className="pointer-events-none absolute -inset-px rounded-lg md:rounded-xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
           style={{
@@ -119,7 +120,7 @@ function SecondaryArticleGlow({ article }: { article: Article }) {
             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="absolute top-4 left-4">
+          <div className="absolute bottom-4 right-4 z-20">
             <span className="px-3 py-1 rounded-full border border-white/20 bg-black/40 backdrop-blur-md font-heading font-medium text-white text-xs">
               {article.category}
             </span>
@@ -139,7 +140,7 @@ function SecondaryArticleGlow({ article }: { article: Article }) {
           <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-white/40 to-white/90 shrink-0" />
           <span className="text-xs font-body text-white/50">Admin</span>
           <span className="text-white/20 text-xs">·</span>
-          <span className="text-xs font-body text-white/40">{article.date}</span>
+          <span className="text-xs font-body text-white/40">{formatDisplayDate(article.date)}</span>
         </div>
       </div>
     </Link>
@@ -156,7 +157,7 @@ function GridArticleGlow({ article }: { article: Article }) {
   }
   return (
     <Link href={`/news/${article.slug}`} className="group block" onMouseMove={handleMouseMove} data-cursor-hover>
-      <div className="relative aspect-[4/3] rounded-lg md:rounded-xl overflow-hidden bg-white/5 p-[1px]">
+      <div className="relative aspect-[3/2] rounded-lg md:rounded-xl overflow-hidden bg-white/5 p-[1px]">
         <motion.div
           className="pointer-events-none absolute -inset-px rounded-lg md:rounded-xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
           style={{
@@ -187,7 +188,7 @@ function GridArticleGlow({ article }: { article: Article }) {
           <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-white/40 to-white/90 shrink-0" />
           <span className="text-[11px] font-body text-white/50">Admin</span>
           <span className="text-white/20 text-[11px]">·</span>
-          <span className="text-[11px] font-body text-white/40">{article.date}</span>
+          <span className="text-[11px] font-body text-white/40">{formatDisplayDate(article.date)}</span>
         </div>
       </div>
     </Link>

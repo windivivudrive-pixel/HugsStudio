@@ -4,6 +4,7 @@ import { databases, APPWRITE_CONFIG } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import NewsPageClient from "@/components/NewsPageClient";
 import { Metadata } from "next";
+import { convertToISODate } from "@/lib/date";
 
 export const revalidate = 60; // ISR - revalidate every 60 seconds
 
@@ -25,11 +26,11 @@ async function getArticles(): Promise<Article[]> {
     const response = await databases.listDocuments(
       APPWRITE_CONFIG.DATABASE_ID,
       APPWRITE_CONFIG.COLLECTIONS.NEWS,
-      [Query.limit(20)]
+      [Query.orderDesc('$createdAt'), Query.limit(100)]
     );
     
     if (response.documents.length > 0) {
-      return response.documents.map((doc: any) => ({
+      const articles = response.documents.map((doc: any) => ({
         id: doc.$id,
         slug: doc.slug,
         title: doc.title,
@@ -38,13 +39,24 @@ async function getArticles(): Promise<Article[]> {
         image: doc.image,
         content: doc.content,
       }));
+
+      // Sort articles by date descending
+      return articles.sort((a, b) => {
+        const timeA = new Date(convertToISODate(a.date)).getTime();
+        const timeB = new Date(convertToISODate(b.date)).getTime();
+        return timeB - timeA;
+      });
     }
   } catch (error) {
     console.error("Appwrite news fetch failed on server, using mock fallback:", error);
   }
 
   // Option A Fallback: Mock Data
-  return articlesData;
+  return [...articlesData].sort((a, b) => {
+    const timeA = new Date(convertToISODate(a.date)).getTime();
+    const timeB = new Date(convertToISODate(b.date)).getTime();
+    return timeB - timeA;
+  });
 }
 
 export default async function NewsPage() {

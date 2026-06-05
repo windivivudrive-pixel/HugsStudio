@@ -1,13 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { createProject, createNews, uploadSingleFileAction, validateAdminLogin, getAdminProjects, getAdminNews, deleteProject, deleteNews, updateProject, updateNews } from "./actions";
 import { databases, APPWRITE_CONFIG } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import { Loader2, AlertCircle, LogOut, Edit2, Trash2, ExternalLink } from "lucide-react";
 import SeoAnalyzer from "@/components/SeoAnalyzer";
-import imageCompression from "browser-image-compression";
+import { formatDisplayDate, convertToInputDateFormat } from "@/lib/date";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+
+const NEWS_CATEGORIES = [
+  "Tin Marketing",
+  "Tips & Tricks",
+  "Tin Bên Lề",
+  "Cộng Đồng Studio"
+];
 
 // Dynamically import react-quill-new to avoid SSR issues
 const ReactQuill = dynamic(
@@ -23,7 +31,7 @@ const ReactQuill = dynamic(
 import "react-quill-new/dist/quill.snow.css";
 
 
-export default function AdminPage() {
+function AdminPageContent() {
   const [user, setUser] = useState<any>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [loginUsername, setLoginUsername] = useState("");
@@ -55,6 +63,76 @@ export default function AdminPage() {
   const projectQuillRef = useRef<any>(null);
   const newsQuillRef = useRef<any>(null);
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const tab = searchParams.get("tab") || "projects";
+  const action = searchParams.get("action");
+  const docId = searchParams.get("id");
+
+  // Sync tab from URL
+  useEffect(() => {
+    if (tab === "projects" || tab === "news") {
+      setActiveTab(tab);
+    }
+  }, [tab]);
+
+  // Sync action and editingDoc from URL
+  useEffect(() => {
+    if (!user) return; // Wait for authentication
+    
+    if (action === "add") {
+      setShowForm(true);
+      setEditingDoc(null);
+      // Reset form fields
+      if (tab === "projects") {
+        setFullDescription("");
+        setCurrentTitle("");
+        setCurrentDescription("");
+        setGalleryFiles([]);
+        setExistingGallery([]);
+      } else {
+        setNewsContent("");
+        setCurrentTitle("");
+      }
+      setStatus({ type: null, message: "" });
+    } else if (action === "edit" && docId) {
+      if (tab === "projects") {
+        const doc = projectsList.find(p => p.$id === docId);
+        if (doc) {
+          setEditingDoc(doc);
+          setShowForm(true);
+          setFullDescription(doc.fullDescription || "");
+          setCurrentTitle(doc.title || "");
+          setCurrentDescription(doc.description || "");
+          setGalleryFiles([]);
+          setExistingGallery(doc.gallery || []);
+          setStatus({ type: null, message: "" });
+        }
+      } else if (tab === "news") {
+        const doc = newsList.find(n => n.$id === docId);
+        if (doc) {
+          setEditingDoc(doc);
+          setShowForm(true);
+          setNewsContent(doc.content || "");
+          setCurrentTitle(doc.title || "");
+          setStatus({ type: null, message: "" });
+        }
+      }
+    } else {
+      setShowForm(false);
+      setEditingDoc(null);
+      // Clear form states when going back to list to avoid stale inputs
+      setFullDescription("");
+      setNewsContent("");
+      setCurrentTitle("");
+      setCurrentDescription("");
+      setGalleryFiles([]);
+      setExistingGallery([]);
+    }
+  }, [action, docId, projectsList, newsList, tab, user]);
+
   const loadLists = async () => {
     if (!user) return;
     setIsLoadingLists(true);
@@ -76,28 +154,15 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    if (!showForm && !editingDoc) {
-      loadLists();
-    }
-  }, [activeTab, user, showForm, editingDoc]);
+    loadLists();
+  }, [activeTab, user]);
 
   const handleEditProject = (doc: any) => {
-    setEditingDoc(doc);
-    setShowForm(true);
-    setFullDescription(doc.fullDescription || "");
-    setCurrentTitle(doc.title || "");
-    setCurrentDescription(doc.description || "");
-    setGalleryFiles([]);
-    setExistingGallery(doc.gallery || []);
-    setStatus({ type: null, message: "" });
+    router.push(`${pathname}?tab=projects&action=edit&id=${doc.$id}`);
   };
 
   const handleEditNews = (doc: any) => {
-    setEditingDoc(doc);
-    setShowForm(true);
-    setNewsContent(doc.content || "");
-    setCurrentTitle(doc.title || "");
-    setStatus({ type: null, message: "" });
+    router.push(`${pathname}?tab=news&action=edit&id=${doc.$id}`);
   };
 
   const handleDeleteProject = async (id: string) => {
@@ -114,24 +179,93 @@ export default function AdminPage() {
     else alert("Xoá thất bại: " + res.error);
   };
 
+  // Helper to dynamically compress images > 5MB on client side
+  const compressIfNeeded = async (file: File): Promise<File> => {
+    if (file && file.size > 5 * 1024 * 1024) {
+      try {
+        console.log(`Image size (${(file.size / 1024 / 1024).toFixed(2)} MB) exceeds 5MB. Compressing...`);
+        const { default: imageCompression } = await import("browser-image-compression");
+        const options = {
+          maxSizeMB: 5,
+          maxWidthOrHeight: 2560,
+          useWebWorker: true,
+        };
+        return await imageCompression(file, options);
+      } catch (err) {
+        console.error("Image compression failed, using original file:", err);
+        return file;
+      }
+    }
+    return file;
+  };
+
   // Helper to upload image to R2 and return URL
   const uploadImageToR2 = async (file: File) => {
     try {
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-      };
-      const compressedFile = await imageCompression(file, options);
+      const processedFile = await compressIfNeeded(file);
       const formData = new FormData();
-      formData.append("file", compressedFile, file.name || "image.png");
+      formData.append("file", processedFile, file.name || "image.png");
       const res = await uploadSingleFileAction(formData);
       if (res.success && res.url) return res.url;
       throw new Error(res.error || "Upload failed");
     } catch (err: any) {
-      console.error("Image upload/compression failed:", err);
+      console.error("Image upload failed:", err);
       throw err;
     }
+  };
+
+  // Helper to upload base64 images in HTML content to R2
+  const uploadBase64Images = async (htmlContent: string) => {
+    if (!htmlContent) return "";
+    
+    // Match <img src="data:image/xxx;base64,xxx"...>
+    const imgRegex = /<img[^>]+src="data:(image\/[^;]+);base64,([^"]+)"[^>]*>/gi;
+    const matches = [];
+    let match;
+    
+    // We must use a copy of regex since we execute in a loop
+    const regexClone = new RegExp(imgRegex);
+    while ((match = regexClone.exec(htmlContent)) !== null) {
+      matches.push({
+        fullTag: match[0],
+        mimeType: match[1],
+        base64Data: match[2]
+      });
+    }
+    
+    if (matches.length === 0) return htmlContent;
+    
+    let updatedHtml = htmlContent;
+    setStatus({ type: "success", message: `Đang tự động xử lý và tải lên ${matches.length} hình ảnh nhúng...` });
+    
+    for (const item of matches) {
+      try {
+        // Decode base64
+        const byteCharacters = atob(item.base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: item.mimeType });
+        const extension = item.mimeType.split('/')[1] || 'png';
+        const file = new File([blob], `embedded-image-${Date.now()}.${extension}`, { type: item.mimeType });
+        
+        // Upload to R2
+        const uploadedUrl = await uploadImageToR2(file);
+        
+        // Replace src value in the tag
+        const srcRegex = /src="data:[^"]+"/gi;
+        const updatedTag = item.fullTag.replace(srcRegex, `src="${uploadedUrl}"`);
+        
+        // Replace full tag in HTML
+        updatedHtml = updatedHtml.replace(item.fullTag, updatedTag);
+      } catch (err) {
+        console.error("Auto R2 upload for base64 failed:", err);
+      }
+    }
+    
+    return updatedHtml;
   };
 
   // Custom Image Handler for Quill toolbar
@@ -291,13 +425,8 @@ export default function AdminPage() {
       
       const imageFile = formData.get("image") as File;
       if (imageFile && imageFile.size > 0) {
-        try {
-          const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
-          const compressedFile = await imageCompression(imageFile, options);
-          formData.set("image", compressedFile, imageFile.name);
-        } catch (error) {
-          console.error("Error compressing cover image:", error);
-        }
+        const processedImage = await compressIfNeeded(imageFile);
+        formData.set("image", processedImage, imageFile.name);
       }
 
       // Upload gallery files
@@ -320,7 +449,14 @@ export default function AdminPage() {
         formData.set("gallery", JSON.stringify(finalGallery));
       }
 
-      formData.set("fullDescription", fullDescription);
+      // Process base64 embedded images in fullDescription
+      const processedFullDesc = await uploadBase64Images(fullDescription);
+      if (processedFullDesc.length > 100000) {
+        setStatus({ type: "error", message: `Nội dung chi tiết dự án quá dài (${processedFullDesc.length} ký tự). Giới hạn tối đa là 100,000 ký tự.` });
+        setIsSubmitting(false);
+        return;
+      }
+      formData.set("fullDescription", processedFullDesc);
       
       let result;
       if (editingDoc) {
@@ -341,10 +477,7 @@ export default function AdminPage() {
           }
           // Reset form view after success
           setTimeout(() => {
-            setEditingDoc(null);
-            setShowForm(false);
-            setGalleryFiles([]);
-            setExistingGallery([]);
+            router.push(`${pathname}?tab=projects`);
           }, 1500);
       } else {
           setStatus({ type: "error", message: result.error || "Failed to process project." });
@@ -366,16 +499,18 @@ export default function AdminPage() {
 
       const imageFile = formData.get("image") as File;
       if (imageFile && imageFile.size > 0) {
-        try {
-          const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
-          const compressedFile = await imageCompression(imageFile, options);
-          formData.set("image", compressedFile, imageFile.name);
-        } catch (error) {
-          console.error("Error compressing cover image:", error);
-        }
+        const processedImage = await compressIfNeeded(imageFile);
+        formData.set("image", processedImage, imageFile.name);
       }
 
-      formData.set("content", newsContent);
+      // Process base64 embedded images in newsContent
+      const processedContent = await uploadBase64Images(newsContent);
+      if (processedContent.length > 100000) {
+        setStatus({ type: "error", message: `Nội dung bài viết quá dài (${processedContent.length} ký tự). Giới hạn tối đa là 100,000 ký tự.` });
+        setIsSubmitting(false);
+        return;
+      }
+      formData.set("content", processedContent);
       
       let result;
       if (editingDoc) {
@@ -393,8 +528,7 @@ export default function AdminPage() {
           }
           // Reset form view after success
           setTimeout(() => {
-            setEditingDoc(null);
-            setShowForm(false);
+            router.push(`${pathname}?tab=news`);
           }, 1500);
       } else {
           setStatus({ type: "error", message: result.error || "Failed to process news." });
@@ -490,13 +624,13 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="flex gap-4 mb-8 border-b border-white/10 pb-4">
           <button
-            onClick={() => { setActiveTab("projects"); setShowForm(false); setEditingDoc(null); setStatus({ type: null, message: "" }); setGalleryFiles([]); setExistingGallery([]); }}
+            onClick={() => { router.push(`${pathname}?tab=projects`); setStatus({ type: null, message: "" }); }}
             className={`px-6 py-2 font-heading tracking-wide transition-colors ${activeTab === "projects" ? "text-white border-b-2 border-white" : "text-ash hover:text-white"}`}
           >
             Dự án
           </button>
           <button
-            onClick={() => { setActiveTab("news"); setShowForm(false); setEditingDoc(null); setStatus({ type: null, message: "" }); setGalleryFiles([]); setExistingGallery([]); }}
+            onClick={() => { router.push(`${pathname}?tab=news`); setStatus({ type: null, message: "" }); }}
             className={`px-6 py-2 font-heading tracking-wide transition-colors ${activeTab === "news" ? "text-white border-b-2 border-white" : "text-ash hover:text-white"}`}
           >
             Tin tức
@@ -524,14 +658,7 @@ export default function AdminPage() {
                    </div>
                    <button 
                     onClick={() => { 
-                      setShowForm(true); 
-                      setEditingDoc(null); 
-                      setStatus({ type: null, message: "" }); 
-                      setGalleryFiles([]); 
-                      setExistingGallery([]);
-                      setFullDescription("");
-                      setCurrentTitle("");
-                      setCurrentDescription("");
+                      router.push(`${pathname}?tab=projects&action=add`);
                     }}
                     className="px-5 py-2.5 bg-white text-black rounded-full font-heading font-bold hover:bg-white-dim transition-all flex items-center gap-2"
                    >
@@ -573,7 +700,7 @@ export default function AdminPage() {
             ) : (
               <div className="space-y-6">
                 <button 
-                  onClick={() => { setShowForm(false); setEditingDoc(null); setStatus({ type: null, message: "" }); }}
+                  onClick={() => { router.push(`${pathname}?tab=projects`); }}
                   className="mb-4 text-white/50 hover:text-white transition-colors flex items-center gap-2"
                 >
                   ← Quay lại danh sách
@@ -741,11 +868,7 @@ export default function AdminPage() {
                    </div>
                    <button 
                     onClick={() => { 
-                      setShowForm(true); 
-                      setEditingDoc(null); 
-                      setStatus({ type: null, message: "" });
-                      setNewsContent("");
-                      setCurrentTitle("");
+                      router.push(`${pathname}?tab=news&action=add`);
                     }}
                     className="px-5 py-2.5 bg-white text-black rounded-full font-heading font-bold hover:bg-white-dim transition-all flex items-center gap-2"
                    >
@@ -765,7 +888,7 @@ export default function AdminPage() {
                           {article.image && <img src={article.image} alt="" className="w-16 h-16 object-cover rounded-lg shrink-0" />}
                           <div className="min-w-0">
                             <h3 className="font-heading font-semibold text-lg line-clamp-1">{article.title}</h3>
-                            <p className="text-sm text-white/50">{article.category} • {article.date}</p>
+                            <p className="text-sm text-white/50">{article.category} • {formatDisplayDate(article.date)}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
@@ -787,7 +910,7 @@ export default function AdminPage() {
             ) : (
               <div className="space-y-6">
                 <button 
-                  onClick={() => { setShowForm(false); setEditingDoc(null); setStatus({ type: null, message: "" }); }}
+                  onClick={() => { router.push(`${pathname}?tab=news`); }}
                   className="mb-4 text-white/50 hover:text-white transition-colors flex items-center gap-2"
                 >
                   ← Quay lại danh sách
@@ -809,14 +932,17 @@ export default function AdminPage() {
                         </div>
                         <div className="flex flex-col gap-2">
                           <label className="text-sm font-medium text-ash">Date</label>
-                          <input required type="text" name="date" defaultValue={editingDoc?.date} placeholder="e.g. Jun 9, 2025" className="bg-[#141414] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-white/40" />
+                          <input required type="date" name="date" defaultValue={editingDoc?.date ? convertToInputDateFormat(editingDoc.date) : new Date().toISOString().split('T')[0]} className="bg-[#141414] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-white/40" />
                         </div>
                         <div className="flex flex-col gap-2">
                           <label className="text-sm font-medium text-ash">Category</label>
                           <select required name="category" defaultValue={editingDoc?.category} className="bg-[#141414] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-white/40">
                             <option value="">Select a category</option>
-                            {categories.map(cat => (
-                              <option key={cat.id} value={cat.name}>{cat.name}</option>
+                            {editingDoc?.category && !NEWS_CATEGORIES.includes(editingDoc.category) && (
+                              <option value={editingDoc.category}>{editingDoc.category} (Cũ/Legacy)</option>
+                            )}
+                            {NEWS_CATEGORIES.map(cat => (
+                              <option key={cat} value={cat}>{cat}</option>
                             ))}
                           </select>
                         </div>
@@ -862,5 +988,20 @@ export default function AdminPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense fallback={
+      <div className="admin-page min-h-screen bg-[#0c0c0c] flex items-center justify-center">
+        <div className="text-white/50 flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin" />
+          <p>Đang tải trang quản trị...</p>
+        </div>
+      </div>
+    }>
+      <AdminPageContent />
+    </Suspense>
   );
 }

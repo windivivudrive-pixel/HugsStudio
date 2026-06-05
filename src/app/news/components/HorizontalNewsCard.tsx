@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { Article } from "@/data/news";
+import { formatDisplayDate } from "@/lib/date";
 
 interface HorizontalNewsCardProps {
   article: Article;
@@ -41,7 +42,7 @@ export default function HorizontalNewsCard({ article }: HorizontalNewsCardProps)
         />
 
         {/* Thumbnail Image Container */}
-        <div className="relative w-[110px] sm:w-[150px] md:w-64 aspect-[4/3] rounded-md overflow-hidden shrink-0 z-10 bg-white/5 border border-white/5">
+        <div className="relative w-[110px] sm:w-[150px] md:w-64 aspect-[3/2] rounded-md overflow-hidden shrink-0 z-10 bg-white/5 border border-white/5">
           <Image
             src={article.image}
             alt={article.title}
@@ -66,14 +67,14 @@ export default function HorizontalNewsCard({ article }: HorizontalNewsCardProps)
 
           <div className="mt-auto hidden md:block">
             <span className="text-[11px] font-body text-white/40">
-              {article.date}
+              {formatDisplayDate(article.date)}
             </span>
           </div>
 
           {/* Mobile Bottom Row */}
           <div className="flex items-center gap-2 mt-auto md:hidden pt-1">
             <span className="text-[10px] font-body text-white/40 uppercase tracking-tight">
-              {article.date}
+              {formatDisplayDate(article.date)}
             </span>
           </div>
         </div>

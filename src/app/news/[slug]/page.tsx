@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
@@ -6,6 +5,7 @@ import { Article, articlesData } from "@/data/news";
 import { databases, APPWRITE_CONFIG } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import { Metadata } from "next";
+import { formatDisplayDate, convertToISODate } from "@/lib/date";
 
 export const revalidate = 60; // ISR - revalidate every 60 seconds
 
@@ -49,21 +49,80 @@ async function getArticle(slug: string): Promise<Article | null> {
   return null;
 }
 
-// Helper function to extract FAQs from article HTML content
+// Helper function to extract FAQs from article HTML/Plain text content
 function extractFAQs(htmlContent: string): { question: string; answer: string }[] {
   const faqs: { question: string; answer: string }[] = [];
-  const cleanContent = htmlContent.replace(/&nbsp;|\u00A0/g, ' ');
-  
-  // Match headings (h2-h5), paragraphs or strong tags containing questions (ending with '?')
-  // followed by subsequent answer paragraphs
-  const headingRegex = /<(h[2-5]|p|strong)[^>]*>(.*?\?)\s*<\/\1>\s*<p[^>]*>(.*?)<\/p>/gi;
-  
-  let match;
-  while ((match = headingRegex.exec(cleanContent)) !== null) {
-    const question = match[2].replace(/<[^>]*>/g, '').trim();
-    const answer = match[3].replace(/<[^>]*>/g, '').trim();
-    if (question && answer) {
-      faqs.push({ question, answer });
+  if (!htmlContent) return faqs;
+
+  // Normalize spaces and non-breaking spaces
+  const normalized = htmlContent.replace(/&nbsp;|\u00A0/g, ' ');
+
+  // Detect if content is HTML
+  const isHtml = /<[a-z][\s\S]*>/i.test(normalized);
+  let textContent = normalized;
+
+  if (isHtml) {
+    // Replace block-level HTML tags with newlines to separate paragraphs/sections
+    textContent = normalized
+      .replace(/<\/p>|<\/h[1-6]>|<\/div>|<br\s*\/?>/gi, '\n')
+      // Strip all remaining HTML tags
+      .replace(/<[^>]*>/g, '');
+  }
+
+  // Split content into lines/paragraphs
+  const blocks = textContent
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+  // For each block, split into sentences
+  const sentences: string[] = [];
+  for (const block of blocks) {
+    // Split sentences by . ? ! followed by spaces, using ES2018 lookbehind
+    const sentenceSplit = block.split(/(?<=[.?!])\s+/);
+    for (const s of sentenceSplit) {
+      const trimmed = s.trim();
+      if (trimmed.length > 0) {
+        sentences.push(trimmed);
+      }
+    }
+  }
+
+  // Find Q&As in sentences
+  for (let i = 0; i < sentences.length - 1; i++) {
+    const currentSentence = sentences[i];
+    
+    // A question ends with '?' and has a reasonable length (10 to 150 chars)
+    const isQuestion = currentSentence.endsWith('?') && currentSentence.length >= 10 && currentSentence.length <= 150;
+    
+    if (isQuestion) {
+      let answer = '';
+      let j = i + 1;
+      
+      // Collect subsequent sentences as the answer (up to 3 sentences or until next question)
+      while (j < sentences.length) {
+        const nextSentence = sentences[j];
+        const isNextQuestion = nextSentence.endsWith('?') && nextSentence.length >= 10 && nextSentence.length <= 150;
+        
+        if (isNextQuestion) {
+          break; // Stop collecting if we hit another question
+        }
+        
+        answer += (answer ? ' ' : '') + nextSentence;
+        j++;
+        
+        if (j - (i + 1) >= 3) break; // Collect at most 3 sentences for the answer
+      }
+
+      answer = answer.trim();
+      // Ensure answer is valid and of reasonable length (>= 15 chars)
+      if (answer && answer.length >= 15) {
+        faqs.push({
+          question: currentSentence,
+          answer: answer
+        });
+        i = j - 1; // Skip ahead
+      }
     }
   }
   
@@ -159,7 +218,7 @@ export default async function ArticlePage({ params }: Props) {
     "image": [
       article.image.startsWith('http') ? article.image : `https://hugs-studio.vercel.app${article.image}`
     ],
-    "datePublished": article.date,
+    "datePublished": convertToISODate(article.date),
     "author": {
       "@type": "Person",
       "name": "Admin",
@@ -224,7 +283,7 @@ export default async function ArticlePage({ params }: Props) {
             <div className="flex items-center justify-center gap-4 font-heading text-xs uppercase tracking-wider text-ash mb-6">
               <span className="text-white/80">{article.category}</span>
               <div className="w-1 h-1 rounded-full bg-white/20" />
-              <span>{article.date}</span>
+              <span>{formatDisplayDate(article.date)}</span>
               <div className="w-1 h-1 rounded-full bg-white/20" />
               <span>{readTime} min read</span>
             </div>
@@ -233,16 +292,6 @@ export default async function ArticlePage({ params }: Props) {
             </h1>
           </header>
 
-          {/* Hero Image */}
-          <div className="relative w-full aspect-[16/9] max-w-6xl mx-auto rounded-2xl overflow-hidden mb-12 md:mb-20 bg-white/5 border border-white/10">
-            <Image
-              src={article.image}
-              alt={article.title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
 
           {/* Article Content */}
           <div className="max-w-4xl mx-auto font-body text-lg text-ash leading-relaxed space-y-8">

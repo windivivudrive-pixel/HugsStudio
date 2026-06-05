@@ -16,7 +16,7 @@ export const articlesData: Article[] = [
     date: "24 Tháng 3, 2026",
     category: "Design",
     image: "/image/news_1.png",
-    content: "Năm 2026 đánh dấu bước ngoặt lớn khi AI không còn là công cụ hỗ trợ mà trở thành cộng sự đắc lực của Designer. Tại HUGs STUDIO, chúng tôi áp dụng Generative AI để tối ưu hóa quy trình phác thảo ý tưởng, giúp tiết kiệm 40% thời gian nghiên cứu nhưng vẫn đảm bảo tính độc bản của thương hiệu."
+    content: "Năm 2026 đánh dấu bước ngoặt lớn khi AI không còn là công cụ hỗ trợ mà trở thành cộng sự đắc lực của Designer. Tại HUGs STUDIO, chúng tôi áp dụng Generative AI để tối ưu hóa quy trình phác thảo ý tưởng, giúp tiết kiệm 40% thời gian nghiên cứu nhưng vẫn đảm bảo tính độc bản của thương hiệu. AI sáng tạo ảnh hưởng thế nào đến vai trò của thiết kế đồ họa truyền thống? Trí tuệ nhân tạo không thay thế designer mà hoạt động như một cộng sự, giúp tự động hóa các công việc lặp đi lặp lại và tối ưu hóa thời gian phác thảo ý tưởng thiết kế."
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ export const articlesData: Article[] = [
     date: "23 Tháng 3, 2026",
     category: "UI/UX Design",
     image: "/image/news_2.png",
-    content: "Trong kỷ nguyên số, khách hàng không chỉ mua sản phẩm, họ mua trải nghiệm. Một giao diện (UI) đẹp là chưa đủ, tính logic và sự mượt mà trong trải nghiệm (UX) mới là yếu tố giữ chân người dùng. Chúng tôi tập trung vào việc tối giản hóa mọi thao tác phức tạp để mang lại sự hài lòng tuyệt đối."
+    content: "Trong kỷ nguyên số, khách hàng không chỉ mua sản phẩm, họ mua trải nghiệm. Một giao diện (UI) đẹp là chưa đủ, tính logic và sự mượt mà trong trải nghiệm (UX) mới là yếu tố giữ chân người dùng. Chúng tôi tập trung vào việc tối giản hóa mọi thao tác phức tạp để mang lại sự hài lòng tuyệt đối. Yếu tố nào cốt lõi nhất để nâng cao trải nghiệm người dùng trên website? Sự tối giản hóa trong các thao tác phức tạp cùng giao diện tải trang mượt mà chính là chìa khóa giữ chân khách hàng lâu hơn."
   },
   {
     id: 3,
@@ -43,7 +43,7 @@ export const articlesData: Article[] = [
     date: "21 Tháng 3, 2026",
     category: "Web Development",
     image: "/image/news_4.png",
-    content: "Tốc độ tải trang là yếu tố sống còn của SEO. Với việc sử dụng Next.js 15 và Cloudflare R2, HUGs STUDIO cam kết mang đến những website có tốc độ phản hồi tính bằng mili giây, giúp tăng tỷ lệ chuyển đổi và uy tín thương hiệu trên môi trường Internet."
+    content: "Tốc độ tải trang là yếu tố sống còn của SEO. Với việc sử dụng Next.js 15 và Cloudflare R2, HUGs STUDIO cam kết mang đến những website có tốc độ phản hồi tính bằng mili giây, giúp tăng tỷ lệ chuyển đổi và uy tín thương hiệu trên môi trường Internet. Next.js 15 giúp cải thiện tốc độ tải trang SEO như thế nào? Next.js 15 kết hợp Server Components và cơ chế caching thông minh tại CDN để giảm thiểu tối đa thời gian phản hồi, từ đó tối ưu chỉ số Core Web Vitals tốt nhất."
   },
   {
     id: 5,
@@ -52,7 +52,7 @@ export const articlesData: Article[] = [
     date: "20 Tháng 3, 2026",
     category: "Photography",
     image: "/image/news_5.png",
-    content: "Hình ảnh là ngôn ngữ trực quan mạnh mẽ nhất. Bài viết này chia sẻ các kỹ thuật về ánh sáng, bố cục và hậu kỳ để làm nổi bật sự sang trọng của sản phẩm, giúp khách hàng đưa ra quyết định mua hàng ngay từ cái nhìn đầu tiên."
+    content: "Hình ảnh là ngôn ngữ trực quan mạnh mẽ nhất. Bài viết này chia sẻ các kỹ thuật về ánh sáng, bố cục và hậu kỳ để làm nổi bật sự sang trọng của sản phẩm, giúp khách hàng đưa ra quyết định mua hàng ngay từ cái nhìn đầu tiên. Làm sao để làm nổi bật sản phẩm cao cấp khi chụp ảnh thương mại? Việc sử dụng nghệ thuật điều phối ánh sáng và sắp đặt bố cục tinh tế chính là bí quyết tạo nên sự sang trọng và thu hút người xem từ cái nhìn đầu tiên."
   },
   {
     id: 6,
@@ -70,7 +70,7 @@ export const articlesData: Article[] = [
     date: "18 Tháng 3, 2026",
     category: "Design",
     image: "/image/news_1.png",
-    content: "Lựa chọn font chữ phù hợp giúp định hình phong cách thương hiệu: mạnh mẽ, thanh lịch hay phá cách. Typography không chỉ là việc chọn kiểu chữ, mà là cách chúng ta điều phối khoảng trống và nhịp điệu để tạo nên cảm xúc cho người đọc."
+    content: "Lựa chọn font chữ phù hợp giúp định hình phong cách thương hiệu: mạnh mẽ, thanh lịch hay phá cách. Typography không chỉ là việc chọn kiểu chữ, mà là cách chúng ta điều phối khoảng trống và nhịp điệu để tạo nên cảm xúc cho người đọc. Lựa chọn typography ảnh hưởng như thế nào đến tính cách thương hiệu? Kiểu chữ phù hợp giúp định hình phong cách rõ nét, truyền tải đúng cảm xúc từ sang trọng, lịch lãm cho tới cá tính, phá cách."
   },
   {
     id: 8,
