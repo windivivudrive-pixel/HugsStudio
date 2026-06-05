@@ -42,7 +42,7 @@ function ArticleCard({ article }: { article: Article }) {
           data-cursor-hover
         >
           {/* Card Border wrapper (similar to ProjectsShowcase) */}
-          <div className="relative overflow-hidden rounded-3xl bg-white/10 p-[2px] aspect-[4/3]">
+          <div className="relative overflow-hidden rounded-3xl bg-white/10 p-[2px] aspect-[3/2]">
             {/* Spotlight Border Glow */}
             <motion.div
               className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
